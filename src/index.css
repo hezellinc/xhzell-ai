@@ -32,3 +32,38 @@ html, body {
   animation: shimmer-text 3s linear infinite;
 }
 
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-border {
+  0% {
+    --angle: 0deg;
+    opacity: 1;
+  }
+  90% {
+    --angle: 720deg;
+    opacity: 1;
+  }
+  100% {
+    --angle: 720deg;
+    opacity: 0;
+  }
+}
+
+.user-bubble-animated::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--angle), transparent 0%, transparent 50%, rgba(255,105,180,0.1) 50%, #ff69b4 65%, #3b82f6 75%, #ef4444 90%, #f97316 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-border 3s linear forwards;
+  pointer-events: none;
+}
+

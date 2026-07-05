@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
-  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon
+  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
@@ -23,7 +23,6 @@ interface ChatHistoryItem {
 export default function App() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [activeChatId, setActiveChatId] = useState('1');
@@ -48,11 +47,6 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowWelcome(false), 2500);
-    return () => clearTimeout(timer);
-  }, []);
-  
   const toggleFavorite = () => {
     setChatHistory(prev => prev.map(item => 
       item.id === activeChatId ? { ...item, isFavorite: !item.isFavorite } : item
@@ -160,26 +154,6 @@ export default function App() {
   return (
     <div className="relative h-[100dvh] w-full bg-black text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none">
       
-      <AnimatePresence>
-        {showWelcome && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 1 } }}
-            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md"
-          >
-            <motion.h1 
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 tracking-tight"
-            >
-              Welcome to Xhzell AI.
-            </motion.h1>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <AnimatePresence>
         {showSettings && (
           <SettingsPage onClose={() => setShowSettings(false)} />
@@ -306,33 +280,69 @@ export default function App() {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6"
       >
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center opacity-70">
-            <motion.h1 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="text-2xl md:text-3xl font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400"
+        <AnimatePresence mode="wait">
+          {messages.length === 0 ? (
+            <motion.div 
+              key="welcome"
+              exit={{ opacity: 0, y: -40 }}
+              transition={{ duration: 0.4, ease: "easeIn" }}
+              className="h-full flex flex-col items-center justify-center opacity-70"
             >
-              Welcome to Xhzell AI.
-            </motion.h1>
-          </div>
-        ) : (
-          <div className="max-w-3xl mx-auto space-y-6 w-full pb-10">
-            {messages.map((msg, idx) => (
-              <div 
-                key={idx} 
-                className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="relative"
               >
-                <div 
-                  className={`
-                    max-w-[85%] md:max-w-[85%] select-text
-                    ${msg.role === 'user' 
-                      ? 'bg-white/10 backdrop-blur-sm text-white rounded-3xl rounded-br-sm px-5 py-3.5 border border-white/10 shadow-sm' 
-                      : 'bg-transparent text-gray-100 px-2 py-2'
-                    }
-                  `}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, rotate: -15 }}
+                  animate={{ opacity: [0, 1, 0.8, 1], scale: [0.8, 1.2, 1], rotate: 0 }}
+                  transition={{ duration: 2, delay: 0.8, repeat: Infinity, repeatDelay: 3 }}
+                  className="absolute -top-6 -right-6 text-red-500/80 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]"
                 >
+                  <Heart className="w-5 h-5 fill-red-500" />
+                </motion.div>
+                <h1 className="text-3xl md:text-5xl font-bold tracking-tight animate-shimmer-text drop-shadow-sm pb-2">
+                  Welcome to Xhzell AI.
+                </h1>
+                
+                {/* Sliding glowing line */}
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] overflow-hidden rounded-full">
+                  <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "100%" }}
+                    transition={{ duration: 1.5, delay: 1.2, ease: "easeInOut" }}
+                    className="w-full h-full bg-gradient-to-r from-transparent via-white to-transparent drop-shadow-[0_0_8px_rgba(255,255,255,1)]"
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="chat"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="max-w-3xl mx-auto space-y-6 w-full pb-10"
+            >
+              <AnimatePresence initial={false}>
+                {messages.map((msg, idx) => (
+                  <motion.div 
+                    key={idx} 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div 
+                      className={`
+                        max-w-[85%] md:max-w-[85%] select-text
+                        ${msg.role === 'user' 
+                          ? 'user-bubble-animated relative bg-white/10 border border-white/10 backdrop-blur-sm text-white rounded-3xl rounded-br-sm px-5 py-3.5 shadow-sm' 
+                          : 'bg-transparent text-gray-100 px-2 py-2'
+                        }
+                      `}
+                    >
                   {msg.role === 'user' ? (
                     <div className="whitespace-pre-wrap font-sans text-[15px] md:text-base tracking-wide">{msg.text}</div>
                   ) : (
@@ -341,8 +351,9 @@ export default function App() {
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
+            </AnimatePresence>
             {isLoading && (
               <div className="flex w-full justify-start">
                 <div className="max-w-[85%] md:max-w-[75%] px-2 py-4">
@@ -354,8 +365,9 @@ export default function App() {
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {/* Bottom Input Area */}
