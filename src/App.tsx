@@ -7,6 +7,8 @@ import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
 import { CanvasBackground } from './components/CanvasBackground';
 import { AILoadingIndicator } from './components/AILoadingIndicator';
+import { LoginPage } from './components/LoginPage';
+import { NotificationPanel, NotificationItem } from './components/NotificationPanel';
 
 type Role = 'user' | 'model';
 
@@ -27,6 +29,10 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [activeChatId, setActiveChatId] = useState('1');
   
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([
@@ -156,13 +162,48 @@ export default function App() {
   return (
     <div className="relative h-[100dvh] w-full text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none">
       <CanvasBackground />
-      <AnimatePresence>
-        {showSettings && (
-          <SettingsPage onClose={() => setShowSettings(false)} />
-        )}
-      </AnimatePresence>
+      <AnimatePresence mode="wait">
+        {!isAuthenticated ? (
+          <LoginPage key="login" onLoginSuccess={(name) => {
+            setUserName(name);
+            setIsAuthenticated(true);
+            setNotifications([{
+              id: Date.now().toString(),
+              title: `Halo, ${name}!`,
+              message: 'Selamat datang di XhzellAI. Senang melihat Anda di sini!',
+              isRead: false,
+              timestamp: new Date()
+            }]);
+          }} />
+        ) : (
+          <motion.div 
+            key="app"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 flex flex-col"
+          >
+            <AnimatePresence>
+              {showSettings && (
+                <SettingsPage onClose={() => setShowSettings(false)} />
+              )}
+              {showNotifications && (
+                <NotificationPanel 
+                  notifications={notifications}
+                  onClose={() => setShowNotifications(false)}
+                  onMarkAsRead={(id) => {
+                    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+                  }}
+                  onDelete={(id) => {
+                    setNotifications(prev => prev.filter(n => n.id !== id));
+                  }}
+                  onDeleteAll={() => setNotifications([])}
+                />
+              )}
+            </AnimatePresence>
 
-      {/* Sidebar Overlay and Sidebar */}
+            {/* Sidebar Overlay and Sidebar */}
       <AnimatePresence>
         {isSidebarOpen && (
           <>
@@ -174,11 +215,11 @@ export default function App() {
               onClick={() => setIsSidebarOpen(false)}
             />
             <motion.div 
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
+              initial={{ x: '-110%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '-110%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-0 left-0 h-full w-72 md:w-80 z-50 bg-[#18181b]/90 backdrop-blur-md border-r border-white/10 p-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] flex flex-col shadow-2xl"
+              className="absolute top-2 left-2 bottom-2 md:top-4 md:left-4 md:bottom-4 w-72 md:w-80 z-50 bg-[#18181b]/70 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 flex flex-col shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
@@ -247,9 +288,14 @@ export default function App() {
         </motion.button>
         
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-[#18181b]/80 backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/10 space-x-1">
-          <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
-            <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
-          </motion.button>
+          <div className="relative">
+            <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowNotifications(!showNotifications)} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
+              <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
+              {notifications.some(n => !n.isRead) && (
+                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.8)] border border-[#18181b]"></span>
+              )}
+            </motion.button>
+          </div>
           <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
             <User className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
           </motion.button>
@@ -418,6 +464,9 @@ export default function App() {
         </div>
       </div>
       </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
