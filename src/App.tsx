@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
+import { CanvasBackground } from './components/CanvasBackground';
+import { AILoadingIndicator } from './components/AILoadingIndicator';
 
 type Role = 'user' | 'model';
 
@@ -152,8 +154,8 @@ export default function App() {
   const regularHistory = chatHistory.filter(h => !h.isFavorite);
 
   return (
-    <div className="relative h-[100dvh] w-full bg-black text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none">
-      
+    <div className="relative h-[100dvh] w-full text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none">
+      <CanvasBackground />
       <AnimatePresence>
         {showSettings && (
           <SettingsPage onClose={() => setShowSettings(false)} />
@@ -355,12 +357,9 @@ export default function App() {
             ))}
             </AnimatePresence>
             {isLoading && (
-              <div className="flex w-full justify-start">
-                <div className="max-w-[85%] md:max-w-[75%] px-2 py-4">
-                  <div className="flex items-center space-x-2">
-                    <Sparkles className="w-5 h-5 text-purple-400 animate-pulse" />
-                    <span className="text-sm font-medium tracking-wider uppercase animate-shimmer-text">Thinking...</span>
-                  </div>
+              <div className="flex w-full justify-start mt-2">
+                <div className="max-w-[85%] md:max-w-[75%] px-2 py-2">
+                  <AILoadingIndicator />
                 </div>
               </div>
             )}
