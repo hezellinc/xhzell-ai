@@ -1,0 +1,6 @@
+{
+  "name": "XhzellAI",
+  "description": "AI Website built with Gemini model for creative content generation",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
