@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
-  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, X, Clock, Trash2
+  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
@@ -25,35 +25,28 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [activeChatId, setActiveChatId] = useState('1');
   
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([
     { id: '1', title: 'Percakapan baru', isFavorite: false, messages: [] },
-    { 
-      id: '2', 
-      title: 'Teori Relativitas', 
-      isFavorite: true, 
-      messages: [
-        { role: 'user', text: 'Jelaskan teori relativitas secara singkat.' },
-        { role: 'model', text: 'Teori relativitas terdiri dari dua bagian: relativitas khusus dan relativitas umum, yang diajukan oleh Albert Einstein.\n\n1. **Relativitas Khusus** (1905): Menyatakan bahwa hukum fisika sama untuk semua pengamat yang tidak bergerak dipercepat, dan bahwa kecepatan cahaya dalam vakum sama untuk semua pengamat, terlepas dari kecepatan relatif mereka. Ini menghasilkan konsep bahwa ruang dan waktu saling terkait dalam "ruang-waktu".\n\n2. **Relativitas Umum** (1915): Memperluas ini dengan memasukkan gravitasi. Einstein mengusulkan bahwa gravitasi bukanlah gaya tarikan seperti yang dipikirkan Newton, melainkan kelengkungan ruang-waktu yang disebabkan oleh massa dan energi.' }
-      ]
-    },
-    { 
-      id: '3', 
-      title: 'Resep nasi goreng', 
-      isFavorite: false, 
-      messages: [
-        { role: 'user', text: 'Apa resep nasi goreng sederhana?' },
-        { role: 'model', text: 'Berikut resep nasi goreng sederhana:\n\n**Bahan:**\n- 2 piring nasi putih (dingin)\n- 2 siung bawang putih, cincang halus\n- 3 siung bawang merah, iris\n- 1 butir telur\n- 2 sdm kecap manis\n- Garam dan merica secukupnya\n- Minyak untuk menumis\n\n**Cara membuat:**\n1. Panaskan minyak, orak-arik telur, lalu sisihkan di pinggir wajan.\n2. Tumis bawang putih dan merah hingga harum.\n3. Masukkan nasi, aduk rata dengan bumbu dan telur.\n4. Tambahkan kecap manis, garam, dan merica. Aduk terus hingga matang merata.\n5. Sajikan selagi hangat!' }
-      ]
-    },
   ]);
 
-  const activeChat = chatHistory.find(c => c.id === activeChatId) || chatHistory[0];
+  const activeChat = chatHistory.find(c => c.id === activeChatId) || chatHistory[0] || { id: 'fallback', title: 'Percakapan baru', isFavorite: false, messages: [] };
   const messages = activeChat.messages;
   const isFavorite = activeChat.isFavorite;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLElement>(null);
+  const isAutoScrollRef = useRef(true);
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150;
+      isAutoScrollRef.current = isNearBottom;
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setShowWelcome(false), 2500);
@@ -112,13 +105,16 @@ export default function App() {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (isAutoScrollRef.current) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+    isAutoScrollRef.current = true;
     const userText = input.trim();
     setInput('');
     
@@ -162,7 +158,7 @@ export default function App() {
   const regularHistory = chatHistory.filter(h => !h.isFavorite);
 
   return (
-    <div className="relative h-[100dvh] w-full bg-black text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col">
+    <div className="relative h-[100dvh] w-full bg-black text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none">
       
       <AnimatePresence>
         {showWelcome && (
@@ -184,6 +180,12 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {showSettings && (
+          <SettingsPage onClose={() => setShowSettings(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar Overlay and Sidebar */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -200,7 +202,7 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-0 left-0 h-full w-72 md:w-80 z-50 bg-[#18181b]/90 backdrop-blur-md border-r border-white/10 p-5 flex flex-col shadow-2xl"
+              className="absolute top-0 left-0 h-full w-72 md:w-80 z-50 bg-[#18181b]/90 backdrop-blur-md border-r border-white/10 p-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] flex flex-col shadow-2xl"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
@@ -259,7 +261,7 @@ export default function App() {
       {/* Main Content Wrapper */}
       <div className="relative z-10 flex flex-col flex-1 w-full overflow-hidden">
         {/* Top Navigation */}
-      <header className="flex items-center justify-between p-4 flex-shrink-0 max-w-7xl mx-auto w-full relative">
+      <header className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] flex-shrink-0 max-w-7xl mx-auto w-full relative">
         <motion.button 
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsSidebarOpen(true)}
@@ -275,7 +277,7 @@ export default function App() {
           <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
             <User className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
           </motion.button>
-          <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
+          <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowSettings(true)} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
             <Settings className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
           </motion.button>
         </div>
@@ -299,7 +301,11 @@ export default function App() {
       </header>
 
       {/* Main Chat Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+      <main 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6"
+      >
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center opacity-70">
             <motion.h1 
@@ -320,7 +326,7 @@ export default function App() {
               >
                 <div 
                   className={`
-                    max-w-[85%] md:max-w-[85%] 
+                    max-w-[85%] md:max-w-[85%] select-text
                     ${msg.role === 'user' 
                       ? 'bg-white/10 backdrop-blur-sm text-white rounded-3xl rounded-br-sm px-5 py-3.5 border border-white/10 shadow-sm' 
                       : 'bg-transparent text-gray-100 px-2 py-2'
@@ -353,7 +359,7 @@ export default function App() {
       </main>
 
       {/* Bottom Input Area */}
-      <div className="w-full p-4 pb-6 md:p-6 md:pb-8 flex justify-center flex-shrink-0 relative z-10">
+      <div className="w-full p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-6 md:pb-[max(2rem,env(safe-area-inset-bottom))] flex justify-center flex-shrink-0 relative z-10">
         <div className="w-full max-w-3xl bg-[#18181b]/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-[#18181b] focus-within:border-white/20">
           <textarea
             value={input}
@@ -364,7 +370,7 @@ export default function App() {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Tulis sesuatu..."
-            className="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none outline-none text-xs md:text-sm min-h-[40px] max-h-[200px] overflow-y-auto px-2"
+            className="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none outline-none text-base min-h-[40px] max-h-[200px] overflow-y-auto px-2"
             rows={1}
             autoFocus
           />
@@ -469,6 +475,62 @@ function SwipeableChatHistoryItem({
         </span>
       </motion.div>
     </div>
+  );
+}
+
+function SettingsPage({ onClose }: { onClose: () => void }) {
+  const dummySettings = [
+    { id: 1, icon: <User size={20} />, title: 'Akun', description: 'Kelola informasi pribadi dan keamanan.' },
+    { id: 2, icon: <Shield size={20} />, title: 'Privasi', description: 'Atur siapa yang bisa melihat aktivitasmu.' },
+    { id: 3, icon: <Bell size={20} />, title: 'Notifikasi', description: 'Pilih apa yang ingin kamu dengar dari kami.' },
+    { id: 4, icon: <Monitor size={20} />, title: 'Tampilan', description: 'Tema gelap, terang, dan preferensi visual.' },
+    { id: 5, icon: <Database size={20} />, title: 'Penyimpanan', description: 'Kelola cache dan data percakapan.' },
+    { id: 6, icon: <Globe size={20} />, title: 'Bahasa', description: 'Ubah bahasa antarmuka aplikasi.' },
+    { id: 7, icon: <Key size={20} />, title: 'API Keys', description: 'Atur kunci API model khusus.' },
+    { id: 8, icon: <Zap size={20} />, title: 'Performa', description: 'Optimalkan kecepatan dan animasi.' },
+    { id: 9, icon: <Smartphone size={20} />, title: 'Perangkat', description: 'Sesi aktif di berbagai perangkat.' },
+    { id: 10, icon: <Hexagon size={20} />, title: 'Lanjutan', description: 'Fitur eksperimental dan developer.' },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: '20px' }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: '20px' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="absolute inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col p-4 md:p-8 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] overflow-y-auto"
+    >
+      <div className="w-full max-w-2xl mx-auto flex flex-col mb-12">
+        <div className="flex items-center justify-between mt-8 mb-10">
+          <h2 className="text-3xl font-serif italic text-white tracking-wide">Pengaturan</h2>
+          <motion.button 
+            whileTap={{ scale: 0.9 }} 
+            onClick={onClose}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          >
+            <X className="w-5 h-5 text-gray-200" />
+          </motion.button>
+        </div>
+
+        <div className="flex flex-col space-y-3">
+          {dummySettings.map(setting => (
+            <motion.div 
+              key={setting.id}
+              whileHover={{ scale: 1.01, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+              className="flex items-start p-4 md:p-5 rounded-3xl bg-white/5 border border-white/5 cursor-pointer transition-colors"
+            >
+              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gray-300 mr-5 flex-shrink-0">
+                {setting.icon}
+              </div>
+              <div className="flex-1 flex flex-col justify-center">
+                <h3 className="text-white font-medium text-lg mb-0.5">{setting.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{setting.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
