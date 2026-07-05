@@ -200,7 +200,7 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-0 left-0 h-full w-72 md:w-80 z-50 bg-white/5 backdrop-blur-3xl border-r border-white/10 p-5 flex flex-col shadow-2xl"
+              className="absolute top-0 left-0 h-full w-72 md:w-80 z-50 bg-white/5 backdrop-blur-xl border-r border-white/10 p-5 flex flex-col shadow-2xl"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
@@ -253,12 +253,8 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Animated Background Gradients */}
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none z-0">
-        <div className="absolute w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] rounded-full mix-blend-screen filter blur-[120px] md:blur-[150px] animate-blob-1"></div>
-        <div className="absolute w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] rounded-full mix-blend-screen filter blur-[100px] md:blur-[120px] animate-blob-2"></div>
-        <div className="absolute w-[40vw] h-[40vw] max-w-[400px] max-h-[400px] rounded-full mix-blend-screen filter blur-[80px] md:blur-[100px] animate-blob-3"></div>
-      </div>
+      {/* Animated Background Canvas */}
+      <AnimatedBackground />
 
       {/* Main Content Wrapper */}
       <div className="relative z-10 flex flex-col h-full w-full">
@@ -272,7 +268,7 @@ export default function App() {
           <Menu className="w-5 h-5 md:w-6 md:h-6 text-gray-300" />
         </motion.button>
         
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-white/5 backdrop-blur-xl rounded-full p-1 shadow-lg border border-white/10 space-x-1">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-white/5 backdrop-blur-md rounded-full p-1 shadow-lg border border-white/10 space-x-1">
           <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
             <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
           </motion.button>
@@ -358,7 +354,7 @@ export default function App() {
 
       {/* Bottom Input Area */}
       <div className="w-full p-4 pb-6 md:p-6 md:pb-8 flex justify-center flex-shrink-0 relative z-10">
-        <div className="w-full max-w-3xl bg-white/5 backdrop-blur-2xl rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-white/10 focus-within:border-white/20">
+        <div className="w-full max-w-3xl bg-white/5 backdrop-blur-xl rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-white/10 focus-within:border-white/20">
           <textarea
             value={input}
             onChange={(e) => {
@@ -476,4 +472,89 @@ function SwipeableChatHistoryItem({
   );
 }
 
+function AnimatedBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let time = 0;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    const render = () => {
+      time += 0.005;
+      const width = canvas.width;
+      const height = canvas.height;
+      
+      ctx.clearRect(0, 0, width, height);
+
+      const minDim = Math.min(width, height);
+      
+      // Blob 1 (Purple/Blue mix)
+      const x1 = width / 2 + Math.sin(time) * minDim * 0.3;
+      const y1 = height / 2 + Math.cos(time * 0.8) * minDim * 0.3;
+      const r1 = minDim * 0.6;
+      
+      const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
+      g1.addColorStop(0, 'rgba(147, 51, 234, 0.15)');
+      g1.addColorStop(0.5, 'rgba(59, 130, 246, 0.05)');
+      g1.addColorStop(1, 'rgba(147, 51, 234, 0)');
+      
+      ctx.fillStyle = g1;
+      ctx.fillRect(0, 0, width, height);
+
+      // Blob 2 (Pink/Orange mix)
+      const x2 = width / 2 + Math.sin(time * 1.2 + Math.PI) * minDim * 0.25;
+      const y2 = height / 2 + Math.cos(time * 0.9 + Math.PI) * minDim * 0.25;
+      const r2 = minDim * 0.55;
+      
+      const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
+      g2.addColorStop(0, 'rgba(236, 72, 153, 0.12)');
+      g2.addColorStop(0.5, 'rgba(249, 115, 22, 0.04)');
+      g2.addColorStop(1, 'rgba(236, 72, 153, 0)');
+      
+      ctx.fillStyle = g2;
+      ctx.fillRect(0, 0, width, height);
+      
+      // Blob 3 (Blue accent)
+      const x3 = width / 2 + Math.sin(time * 0.7 + Math.PI / 2) * minDim * 0.35;
+      const y3 = height / 2 + Math.cos(time * 1.1 + Math.PI / 2) * minDim * 0.35;
+      const r3 = minDim * 0.5;
+      
+      const g3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, r3);
+      g3.addColorStop(0, 'rgba(59, 130, 246, 0.12)');
+      g3.addColorStop(1, 'rgba(59, 130, 246, 0)');
+      
+      ctx.fillStyle = g3;
+      ctx.fillRect(0, 0, width, height);
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className="absolute inset-0 pointer-events-none z-0 opacity-80"
+    />
+  );
+}
