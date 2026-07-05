@@ -162,7 +162,7 @@ export default function App() {
   const regularHistory = chatHistory.filter(h => !h.isFavorite);
 
   return (
-    <div className="relative h-screen bg-black text-white font-sans selection:bg-purple-500/30 overflow-hidden">
+    <div className="relative h-[100dvh] w-full bg-black text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col">
       
       <AnimatePresence>
         {showWelcome && (
@@ -200,7 +200,7 @@ export default function App() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-0 left-0 h-full w-72 md:w-80 z-50 bg-white/5 backdrop-blur-xl border-r border-white/10 p-5 flex flex-col shadow-2xl"
+              className="absolute top-0 left-0 h-full w-72 md:w-80 z-50 bg-[#18181b]/90 backdrop-blur-md border-r border-white/10 p-5 flex flex-col shadow-2xl"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
@@ -257,7 +257,7 @@ export default function App() {
       <AnimatedBackground />
 
       {/* Main Content Wrapper */}
-      <div className="relative z-10 flex flex-col h-full w-full">
+      <div className="relative z-10 flex flex-col flex-1 w-full overflow-hidden">
         {/* Top Navigation */}
       <header className="flex items-center justify-between p-4 flex-shrink-0 max-w-7xl mx-auto w-full relative">
         <motion.button 
@@ -268,7 +268,7 @@ export default function App() {
           <Menu className="w-5 h-5 md:w-6 md:h-6 text-gray-300" />
         </motion.button>
         
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-white/5 backdrop-blur-md rounded-full p-1 shadow-lg border border-white/10 space-x-1">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-[#18181b]/80 backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/10 space-x-1">
           <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
             <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
           </motion.button>
@@ -322,7 +322,7 @@ export default function App() {
                   className={`
                     max-w-[85%] md:max-w-[85%] 
                     ${msg.role === 'user' 
-                      ? 'bg-white/15 backdrop-blur-md text-white rounded-3xl rounded-br-sm px-5 py-3.5 border border-white/10 shadow-sm' 
+                      ? 'bg-white/10 backdrop-blur-sm text-white rounded-3xl rounded-br-sm px-5 py-3.5 border border-white/10 shadow-sm' 
                       : 'bg-transparent text-gray-100 px-2 py-2'
                     }
                   `}
@@ -354,7 +354,7 @@ export default function App() {
 
       {/* Bottom Input Area */}
       <div className="w-full p-4 pb-6 md:p-6 md:pb-8 flex justify-center flex-shrink-0 relative z-10">
-        <div className="w-full max-w-3xl bg-white/5 backdrop-blur-xl rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-white/10 focus-within:border-white/20">
+        <div className="w-full max-w-3xl bg-[#18181b]/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-[#18181b] focus-within:border-white/20">
           <textarea
             value={input}
             onChange={(e) => {
@@ -479,33 +479,38 @@ function AnimatedBackground() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     let animationFrameId: number;
     let time = 0;
+    
+    // Use a lower resolution multiplier to improve performance drastically on mobile
+    const resolution = window.innerWidth < 768 ? 0.5 : 0.75;
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth * resolution;
+      canvas.height = window.innerHeight * resolution;
     };
 
     window.addEventListener('resize', resize);
     resize();
 
     const render = () => {
-      time += 0.005;
+      // Slower animation on mobile
+      time += window.innerWidth < 768 ? 0.003 : 0.005;
       const width = canvas.width;
       const height = canvas.height;
       
-      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
 
       const minDim = Math.min(width, height);
       
       // Blob 1 (Purple/Blue mix)
       const x1 = width / 2 + Math.sin(time) * minDim * 0.3;
       const y1 = height / 2 + Math.cos(time * 0.8) * minDim * 0.3;
-      const r1 = minDim * 0.6;
+      const r1 = minDim * 0.7;
       
       const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
       g1.addColorStop(0, 'rgba(147, 51, 234, 0.15)');
@@ -518,7 +523,7 @@ function AnimatedBackground() {
       // Blob 2 (Pink/Orange mix)
       const x2 = width / 2 + Math.sin(time * 1.2 + Math.PI) * minDim * 0.25;
       const y2 = height / 2 + Math.cos(time * 0.9 + Math.PI) * minDim * 0.25;
-      const r2 = minDim * 0.55;
+      const r2 = minDim * 0.65;
       
       const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
       g2.addColorStop(0, 'rgba(236, 72, 153, 0.12)');
@@ -531,7 +536,7 @@ function AnimatedBackground() {
       // Blob 3 (Blue accent)
       const x3 = width / 2 + Math.sin(time * 0.7 + Math.PI / 2) * minDim * 0.35;
       const y3 = height / 2 + Math.cos(time * 1.1 + Math.PI / 2) * minDim * 0.35;
-      const r3 = minDim * 0.5;
+      const r3 = minDim * 0.6;
       
       const g3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, r3);
       g3.addColorStop(0, 'rgba(59, 130, 246, 0.12)');
@@ -554,7 +559,7 @@ function AnimatedBackground() {
   return (
     <canvas 
       ref={canvasRef} 
-      className="absolute inset-0 pointer-events-none z-0 opacity-80"
+      className="absolute inset-0 pointer-events-none z-0 opacity-80 w-full h-full"
     />
   );
 }
