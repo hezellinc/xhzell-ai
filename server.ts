@@ -15,18 +15,12 @@ const ai = new GoogleGenAI({
 });
 
 export const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 app.post("/api/chat", async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const { contents } = req.body;
     
-    const contents = [];
-    if (history && history.length > 0) {
-        contents.push(...history);
-    }
-    contents.push({ role: "user", parts: [{ text: message }] });
-
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: contents,

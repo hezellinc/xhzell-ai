@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
-  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon
+  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon,
+  Image as ImageIcon, FileText, Video
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
@@ -12,9 +13,19 @@ import { NotificationPanel, NotificationItem } from './components/NotificationPa
 
 type Role = 'user' | 'model';
 
+export interface Attachment {
+  id: string;
+  type: 'image' | 'video' | 'file';
+  name: string;
+  url?: string;
+  base64?: string;
+  mimeType?: string;
+}
+
 interface Message {
   role: Role;
   text: string;
+  attachments?: Attachment[];
 }
 
 interface ChatHistoryItem {
@@ -29,11 +40,17 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('xhzell_auth') === 'true';
+  });
+  const [userName, setUserName] = useState(() => {
+    return localStorage.getItem('xhzell_user') || '';
+  });
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [activeChatId, setActiveChatId] = useState('1');
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([
     { id: '1', title: 'Percakapan baru', isFavorite: false, messages: [] },
@@ -75,7 +92,7 @@ export default function App() {
   };
 
   const handleNewChat = () => {
-    const newId = Date.now().toString();
+    const newId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9);
     setChatHistory(prev => [
       { id: newId, title: 'Percakapan baru', isFavorite: false, messages: [] },
       ...prev
@@ -114,27 +131,56 @@ export default function App() {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if ((!input.trim() && pendingAttachments.length === 0) || isLoading) return;
 
     isAutoScrollRef.current = true;
     const userText = input.trim();
     setInput('');
+    const currentAttachments = [...pendingAttachments];
+    setPendingAttachments([]);
+    setShowAttachmentMenu(false);
     
-    const newMessages: Message[] = [...activeChat.messages, { role: 'user', text: userText }];
+    const newMessages: Message[] = [...activeChat.messages, { 
+      role: 'user', 
+      text: userText, 
+      attachments: currentAttachments.length > 0 ? currentAttachments : undefined 
+    }];
     const shouldGenerateTitle = activeChat.messages.length === 0;
     updateActiveChatMessages(newMessages, shouldGenerateTitle);
     setIsLoading(true);
 
     try {
-      const history = activeChat.messages.map(m => ({
-        role: m.role,
-        parts: [{ text: m.text }]
-      }));
+      const contents = newMessages.map(m => {
+        const parts: any[] = [];
+        if (m.text) {
+          parts.push({ text: m.text });
+        }
+        if (m.attachments) {
+          m.attachments.forEach(att => {
+            if (att.base64 && att.mimeType) {
+              parts.push({
+                inlineData: {
+                  data: att.base64,
+                  mimeType: att.mimeType
+                }
+              });
+            }
+          });
+        }
+        // Fallback for empty parts to avoid Gemini API error
+        if (parts.length === 0) {
+           parts.push({ text: " " });
+        }
+        return {
+          role: m.role,
+          parts: parts
+        };
+      });
 
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userText, history }),
+        body: JSON.stringify({ contents }),
       });
 
       if (!res.ok) throw new Error('Failed to fetch response');
@@ -147,6 +193,39 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAddAttachment = (type: 'file' | 'image' | 'video') => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    if (type === 'image') input.accept = 'image/*';
+    if (type === 'video') input.accept = 'video/*';
+    
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = (reader.result as string).split(',')[1];
+          const newAttachment: Attachment = {
+            id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
+            type,
+            name: file.name,
+            url: URL.createObjectURL(file),
+            base64: base64String,
+            mimeType: file.type
+          };
+          setPendingAttachments(prev => [...prev, newAttachment]);
+          setShowAttachmentMenu(false);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
+  const removePendingAttachment = (id: string) => {
+    setPendingAttachments(prev => prev.filter(a => a.id !== id));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -167,8 +246,10 @@ export default function App() {
           <LoginPage key="login" onLoginSuccess={(name) => {
             setUserName(name);
             setIsAuthenticated(true);
+            localStorage.setItem('xhzell_auth', 'true');
+            localStorage.setItem('xhzell_user', name);
             setNotifications([{
-              id: Date.now().toString(),
+              id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
               title: `Halo, ${name}!`,
               message: 'Selamat datang di XhzellAI. Senang melihat Anda di sini!',
               isRead: false,
@@ -186,7 +267,16 @@ export default function App() {
           >
             <AnimatePresence>
               {showSettings && (
-                <SettingsPage onClose={() => setShowSettings(false)} />
+                <SettingsPage 
+                  onClose={() => setShowSettings(false)} 
+                  onLogout={() => {
+                    setIsAuthenticated(false);
+                    setUserName('');
+                    localStorage.removeItem('xhzell_auth');
+                    localStorage.removeItem('xhzell_user');
+                    setShowSettings(false);
+                  }}
+                />
               )}
               {showNotifications && (
                 <NotificationPanel 
@@ -376,7 +466,7 @@ export default function App() {
               <AnimatePresence initial={false}>
                 {messages.map((msg, idx) => (
                   <motion.div 
-                    key={idx} 
+                    key={`${activeChatId}-${idx}`} 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
@@ -392,7 +482,21 @@ export default function App() {
                       `}
                     >
                   {msg.role === 'user' ? (
-                    <div className="whitespace-pre-wrap font-sans text-[15px] md:text-base tracking-wide">{msg.text}</div>
+                    <div className="flex flex-col gap-2">
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-1">
+                          {msg.attachments.map(att => (
+                            <div key={att.id} className="flex items-center space-x-2 bg-white/20 border border-white/20 rounded-xl px-3 py-2 shadow-sm">
+                              {att.type === 'image' && <ImageIcon size={18} className="text-purple-300" />}
+                              {att.type === 'video' && <Video size={18} className="text-rose-300" />}
+                              {att.type === 'file' && <FileText size={18} className="text-blue-300" />}
+                              <span className="text-sm font-medium text-white truncate max-w-[150px]">{att.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {msg.text && <div className="whitespace-pre-wrap font-sans text-[15px] md:text-base tracking-wide">{msg.text}</div>}
+                    </div>
                   ) : (
                     <div className="markdown-body prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 prose-headings:font-semibold prose-a:text-purple-400 font-sans text-[15px] md:text-base tracking-wide">
                       <Markdown>{msg.text}</Markdown>
@@ -417,7 +521,67 @@ export default function App() {
 
       {/* Bottom Input Area */}
       <div className="w-full p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-6 md:pb-[max(2rem,env(safe-area-inset-bottom))] flex justify-center flex-shrink-0 relative z-10">
-        <div className="w-full max-w-3xl bg-[#18181b]/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-[#18181b] focus-within:border-white/20">
+        <div className="w-full max-w-3xl relative bg-[#18181b]/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-[#18181b] focus-within:border-white/20">
+          <AnimatePresence>
+            {showAttachmentMenu && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="absolute bottom-full left-0 w-full flex justify-center space-x-2 mb-3 z-50 origin-bottom"
+              >
+                {[
+                  { type: 'file', icon: <FileText size={14} />, label: 'Dokumen', color: 'bg-blue-500/20 text-blue-400' },
+                  { type: 'image', icon: <ImageIcon size={14} />, label: 'Gambar', color: 'bg-purple-500/20 text-purple-400' },
+                  { type: 'video', icon: <Video size={14} />, label: 'Video', color: 'bg-rose-500/20 text-rose-400' }
+                ].map((item, i) => (
+                  <motion.button
+                    key={item.type}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ delay: i * 0.05, type: 'spring', stiffness: 400, damping: 15 }}
+                    onClick={() => handleAddAttachment(item.type as 'file' | 'image' | 'video')}
+                    className="flex items-center space-x-1.5 bg-[#27272a]/95 hover:bg-[#3f3f46] border border-white/10 rounded-full px-3 py-1.5 shadow-xl backdrop-blur-md transition-colors"
+                  >
+                    <div className={`p-1 rounded-full ${item.color}`}>
+                      {item.icon}
+                    </div>
+                    <span className="text-xs font-medium text-gray-200 whitespace-nowrap">{item.label}</span>
+                  </motion.button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {pendingAttachments.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3 px-2">
+              <AnimatePresence>
+                {pendingAttachments.map((att) => (
+                  <motion.div
+                    key={att.id}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="relative flex items-center bg-white/10 border border-white/10 rounded-xl p-2 pr-8"
+                  >
+                    <div className="mr-2 text-gray-300">
+                      {att.type === 'image' && <ImageIcon size={16} className="text-purple-400" />}
+                      {att.type === 'video' && <Video size={16} className="text-rose-400" />}
+                      {att.type === 'file' && <FileText size={16} className="text-blue-400" />}
+                    </div>
+                    <span className="text-xs text-gray-200 truncate max-w-[120px]">{att.name}</span>
+                    <button
+                      onClick={() => removePendingAttachment(att.id)}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 hover:bg-red-500/20 rounded-full text-gray-400 hover:text-red-400 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
           <textarea
             value={input}
             onChange={(e) => {
@@ -445,8 +609,12 @@ export default function App() {
             </div>
             
             <div className="flex items-center space-x-2">
-              <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-white/10 hover:bg-white/20 transition-colors rounded-full border border-white/5 flex-shrink-0">
-                <Plus className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
+              <motion.button 
+                whileTap={{ scale: 0.9 }} 
+                onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
+                className={`flex items-center justify-center w-9 h-9 md:w-10 md:h-10 transition-colors rounded-full border flex-shrink-0 ${showAttachmentMenu ? 'bg-white/20 border-white/20' : 'bg-white/10 border-white/5 hover:bg-white/20'}`}
+              >
+                <Plus className={`w-4 h-4 md:w-5 md:h-5 text-gray-300 transition-transform duration-300 ${showAttachmentMenu ? 'rotate-45' : ''}`} />
               </motion.button>
               <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-white/10 hover:bg-white/20 transition-colors rounded-full border border-white/5 flex-shrink-0">
                 <AudioLines className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
@@ -454,7 +622,7 @@ export default function App() {
               <motion.button 
                 whileTap={{ scale: 0.9 }}
                 onClick={() => handleSubmit()}
-                disabled={!input.trim() || isLoading}
+                disabled={(!input.trim() && pendingAttachments.length === 0) || isLoading}
                 className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:hover:bg-white/20 transition-colors rounded-full border border-white/5 flex-shrink-0"
               >
                 <ArrowUp className="w-4 h-4 md:w-5 md:h-5 text-white" />
@@ -538,7 +706,7 @@ function SwipeableChatHistoryItem({
   );
 }
 
-function SettingsPage({ onClose }: { onClose: () => void }) {
+function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: () => void }) {
   const dummySettings = [
     { id: 1, icon: <User size={20} />, title: 'Akun', description: 'Kelola informasi pribadi dan keamanan.' },
     { id: 2, icon: <Shield size={20} />, title: 'Privasi', description: 'Atur siapa yang bisa melihat aktivitasmu.' },
@@ -588,6 +756,19 @@ function SettingsPage({ onClose }: { onClose: () => void }) {
               </div>
             </motion.div>
           ))}
+          <motion.div 
+            whileHover={{ scale: 1.01, backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
+            onClick={onLogout}
+            className="flex items-start p-4 md:p-5 rounded-3xl bg-red-500/10 border border-red-500/20 cursor-pointer transition-colors mt-8"
+          >
+            <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 mr-5 flex-shrink-0">
+              <User size={20} />
+            </div>
+            <div className="flex-1 flex flex-col justify-center">
+              <h3 className="text-red-400 font-medium text-lg mb-0.5">Keluar</h3>
+              <p className="text-red-400/70 text-sm leading-relaxed">Akhiri sesi dan keluar dari akun.</p>
+            </div>
+          </motion.div>
         </div>
       </div>
     </motion.div>
