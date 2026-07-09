@@ -22,7 +22,7 @@ app.post("/api/chat", async (req, res) => {
     const { contents } = req.body;
     
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: "gemini-2.5-flash",
       contents: contents,
       config: {
         systemInstruction: "You are Xhzell AI. You were created by Xhzell. You are a helpful, versatile, and proactive AI assistant. You not only provide answers but can also perform tasks, ask clarifying questions, and offer suggestions to the user. Never mention that you are a language model trained by Google, DeepMind, or any other entity.",
