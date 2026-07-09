@@ -53,7 +53,7 @@ export default function App() {
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user && user.emailVerified) {
+      if (user) {
         setIsAuthenticated(true);
         let name = user.displayName || user.email?.split('@')[0] || 'User';
         let photo = '';
