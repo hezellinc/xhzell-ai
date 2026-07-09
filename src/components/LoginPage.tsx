@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, CheckCircle2, ShieldAlert, Eye, EyeOff } from 'lucide-react';
-import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
 interface LoginPageProps {
@@ -48,7 +48,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     if (isLogin) {
       if (email && password) {
         try {
-          await signInWithEmailAndPassword(auth, email, password);
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          if (!userCredential.user.emailVerified) {
+             await signOut(auth);
+             alert("Silakan verifikasi email Anda terlebih dahulu. Cek kotak masuk atau folder spam Anda.");
+             return;
+          }
           showNotification('Berhasil login');
         } catch (error: any) {
           console.error("Login Error:", error);
@@ -67,8 +72,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       }
       if (email && password) {
         try {
-          await createUserWithEmailAndPassword(auth, email, password);
-          showNotification('Berhasil mendaftar');
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          await sendEmailVerification(userCredential.user);
+          await signOut(auth); // Log them out immediately until they verify
+          alert("Berhasil mendaftar! Tautan verifikasi telah dikirim ke email Anda. Silakan verifikasi sebelum login.");
+          setIsLogin(true); // Switch to login view
         } catch (error: any) {
           console.error("Register Error:", error);
           alert(error.message || "Gagal mendaftar");
