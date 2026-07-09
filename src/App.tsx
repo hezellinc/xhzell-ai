@@ -10,6 +10,7 @@ import { CanvasBackground } from './components/CanvasBackground';
 import { AILoadingIndicator } from './components/AILoadingIndicator';
 import { LoginPage } from './components/LoginPage';
 import { NotificationPanel, NotificationItem } from './components/NotificationPanel';
+import { ProfilePage } from './components/ProfilePage';
 
 type Role = 'user' | 'model';
 
@@ -35,17 +36,50 @@ interface ChatHistoryItem {
   messages: Message[];
 }
 
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
+
 export default function App() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('xhzell_auth') === 'true';
-  });
-  const [userName, setUserName] = useState(() => {
-    return localStorage.getItem('xhzell_user') || '';
-  });
+  const [showProfile, setShowProfile] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [userPhotoURL, setUserPhotoURL] = useState('');
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        let name = user.displayName || user.email?.split('@')[0] || 'User';
+        let photo = '';
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.name) name = data.name;
+            if (data.photoURL) photo = data.photoURL;
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+        setUserName(name);
+        setUserPhotoURL(photo);
+      } else {
+        setIsAuthenticated(false);
+        setUserName('');
+        setUserPhotoURL('');
+      }
+      setIsAuthReady(true);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [activeChatId, setActiveChatId] = useState('1');
@@ -238,6 +272,10 @@ export default function App() {
   const favorites = chatHistory.filter(h => h.isFavorite);
   const regularHistory = chatHistory.filter(h => !h.isFavorite);
 
+  if (!isAuthReady) {
+    return null;
+  }
+
   return (
     <div className="relative h-[100dvh] w-full text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none">
       <CanvasBackground />
@@ -269,12 +307,18 @@ export default function App() {
               {showSettings && (
                 <SettingsPage 
                   onClose={() => setShowSettings(false)} 
-                  onLogout={() => {
-                    setIsAuthenticated(false);
-                    setUserName('');
-                    localStorage.removeItem('xhzell_auth');
-                    localStorage.removeItem('xhzell_user');
+                  onLogout={async () => {
+                    await signOut(auth);
                     setShowSettings(false);
+                  }}
+                />
+              )}
+              {showProfile && (
+                <ProfilePage
+                  onClose={() => setShowProfile(false)}
+                  onProfileUpdated={(name, photo) => {
+                    setUserName(name);
+                    setUserPhotoURL(photo);
                   }}
                 />
               )}
@@ -386,8 +430,22 @@ export default function App() {
               )}
             </motion.button>
           </div>
-          <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
-            <User className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
+          <motion.button 
+            whileTap={{ scale: 0.9 }} 
+            onClick={() => setShowProfile(true)}
+            className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0"
+          >
+            {userPhotoURL ? (
+               <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-purple-500/80 flex items-center justify-center overflow-hidden shadow-sm">
+                 <img src={userPhotoURL} alt="Profile" className="w-full h-full object-cover" />
+               </div>
+            ) : userName ? (
+               <div className="w-6 h-6 md:w-7 md:h-7 rounded-full bg-purple-500/80 flex items-center justify-center text-xs md:text-sm font-bold text-white uppercase shadow-sm">
+                 {userName.charAt(0)}
+               </div>
+            ) : (
+               <User className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
+            )}
           </motion.button>
           <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowSettings(true)} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
             <Settings className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
@@ -708,16 +766,16 @@ function SwipeableChatHistoryItem({
 
 function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: () => void }) {
   const dummySettings = [
-    { id: 1, icon: <User size={20} />, title: 'Akun', description: 'Kelola informasi pribadi dan keamanan.' },
-    { id: 2, icon: <Shield size={20} />, title: 'Privasi', description: 'Atur siapa yang bisa melihat aktivitasmu.' },
-    { id: 3, icon: <Bell size={20} />, title: 'Notifikasi', description: 'Pilih apa yang ingin kamu dengar dari kami.' },
-    { id: 4, icon: <Monitor size={20} />, title: 'Tampilan', description: 'Tema gelap, terang, dan preferensi visual.' },
-    { id: 5, icon: <Database size={20} />, title: 'Penyimpanan', description: 'Kelola cache dan data percakapan.' },
-    { id: 6, icon: <Globe size={20} />, title: 'Bahasa', description: 'Ubah bahasa antarmuka aplikasi.' },
-    { id: 7, icon: <Key size={20} />, title: 'API Keys', description: 'Atur kunci API model khusus.' },
-    { id: 8, icon: <Zap size={20} />, title: 'Performa', description: 'Optimalkan kecepatan dan animasi.' },
-    { id: 9, icon: <Smartphone size={20} />, title: 'Perangkat', description: 'Sesi aktif di berbagai perangkat.' },
-    { id: 10, icon: <Hexagon size={20} />, title: 'Lanjutan', description: 'Fitur eksperimental dan developer.' },
+    { id: 1, icon: <User size={20} />, title: 'Akun' },
+    { id: 2, icon: <Shield size={20} />, title: 'Privasi' },
+    { id: 3, icon: <Bell size={20} />, title: 'Notifikasi' },
+    { id: 4, icon: <Monitor size={20} />, title: 'Tampilan' },
+    { id: 5, icon: <Database size={20} />, title: 'Penyimpanan' },
+    { id: 6, icon: <Globe size={20} />, title: 'Bahasa' },
+    { id: 7, icon: <Key size={20} />, title: 'API Keys' },
+    { id: 8, icon: <Zap size={20} />, title: 'Performa' },
+    { id: 9, icon: <Smartphone size={20} />, title: 'Perangkat' },
+    { id: 10, icon: <Hexagon size={20} />, title: 'Lanjutan' },
   ];
 
   return (
@@ -751,8 +809,7 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
                 {setting.icon}
               </div>
               <div className="flex-1 flex flex-col justify-center">
-                <h3 className="text-white font-medium text-lg mb-0.5">{setting.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{setting.description}</p>
+                <h3 className="text-white font-medium text-lg">{setting.title}</h3>
               </div>
             </motion.div>
           ))}

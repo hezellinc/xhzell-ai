@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, CheckCircle2, ShieldAlert, Eye, EyeOff } from 'lucide-react';
+import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 interface LoginPageProps {
   onLoginSuccess: (username: string) => void;
@@ -29,24 +31,48 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     setCaptchaCode(code);
     setUserCaptcha('');
   };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      showNotification(`Selamat datang, ${user.displayName || user.email?.split('@')[0] || 'User'}`);
+    } catch (error) {
+      console.error("Google Login Error:", error);
+    }
+  };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLogin) {
       if (email && password) {
-        showNotification('Berhasil login');
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          showNotification('Berhasil login');
+        } catch (error: any) {
+          console.error("Login Error:", error);
+          alert(error.message || "Gagal login");
+        }
       }
     } else {
       if (password !== confirmPassword) {
-         // Silently fail for simplicity in demo
+         alert("Password tidak cocok");
          return;
       }
       if (userCaptcha !== captchaCode) {
          generateCaptcha();
+         alert("Kode keamanan salah");
          return;
       }
       if (email && password) {
-        showNotification('Berhasil mendaftar');
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+          showNotification('Berhasil mendaftar');
+        } catch (error: any) {
+          console.error("Register Error:", error);
+          alert(error.message || "Gagal mendaftar");
+        }
       }
     }
   };
@@ -221,6 +247,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 
                 <button 
                   type="button"
+                  onClick={handleGoogleLogin}
                   disabled={isSuccess}
                   className="w-full flex items-center justify-center space-x-3 bg-transparent border border-white/20 text-white rounded-2xl py-3.5 hover:bg-white/5 transition-colors disabled:opacity-50"
                 >

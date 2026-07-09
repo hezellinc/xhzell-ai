@@ -1,9 +1,10 @@
 {
-  "projectId": "fifth-garden-dp497",
-  "appId": "1:682526018346:web:6f72629038e770d47a6c53",
-  "apiKey": "AIzaSyDTO-QZ1k00mf4bXfwf6Bz64bL7kEuZY20",
-  "authDomain": "fifth-garden-dp497.firebaseapp.com",
-  "storageBucket": "fifth-garden-dp497.firebasestorage.app",
-  "messagingSenderId": "682526018346",
+  "projectId": "xhzell",
+  "appId": "1:179060633989:web:1f22aa5dc965d0fcd114ec",
+  "apiKey": "AIzaSyC3qgYD4PqK5eSNU7mx_UpMhnKubvV7KAE",
+  "authDomain": "xhzell.firebaseapp.com",
+  "firestoreDatabaseId": "(default)",
+  "storageBucket": "xhzell.firebasestorage.app",
+  "messagingSenderId": "179060633989",
   "measurementId": ""
 }

@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Display name of the user" },
+        "bio": { "type": "string", "description": "Short biography" },
+        "photoURL": { "type": "string", "description": "Profile picture URL or base64" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["name"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    }
+  }
+}
