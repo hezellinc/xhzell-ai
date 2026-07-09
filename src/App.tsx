@@ -694,12 +694,6 @@ export default function App() {
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </motion.button>
               
-              <motion.button whileTap={{ scale: 0.9 }} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 bg-white/10 hover:bg-white/20 transition-colors rounded-full border border-white/5 flex-shrink-0">
-                <MoreHorizontal className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
-              </motion.button>
-            </div>
-            
-            <div className="flex items-center space-x-2">
               <motion.button 
                 whileTap={{ scale: 0.9 }} 
                 onClick={() => {
@@ -710,6 +704,9 @@ export default function App() {
               >
                 <MoreHorizontal className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
               </motion.button>
+            </div>
+            
+            <div className="flex items-center space-x-2">
               <motion.button 
                 whileTap={{ scale: 0.9 }} 
                 onClick={() => {
