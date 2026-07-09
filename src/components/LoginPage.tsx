@@ -50,8 +50,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         try {
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           if (!userCredential.user.emailVerified) {
+             const resend = window.confirm("Email belum diverifikasi. Cek kotak masuk atau folder spam Anda.\n\nKlik 'OK' jika Anda ingin kami mengirim ulang email verifikasi.");
+             if (resend) {
+                await sendEmailVerification(userCredential.user);
+                alert("Email verifikasi telah dikirim ulang. Silakan periksa email Anda.");
+             }
              await signOut(auth);
-             alert("Silakan verifikasi email Anda terlebih dahulu. Cek kotak masuk atau folder spam Anda.");
              return;
           }
           showNotification('Berhasil login');
