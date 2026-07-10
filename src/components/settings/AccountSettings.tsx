@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { ChevronLeft, User, Mail, Camera, Save, Key, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChevronLeft, User, Mail, Camera, Save, Key, Trash2, Calendar, ChevronDown } from 'lucide-react';
 import { auth, db } from '../../firebase';
 import { updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -10,10 +10,27 @@ interface AccountSettingsProps {
   onLogout: () => void;
 }
 
+const MONTHS = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+
 export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogout }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [accountId, setAccountId] = useState('');
   const [photoURL, setPhotoURL] = useState('');
+  
+  const [dobDay, setDobDay] = useState('');
+  const [dobMonth, setDobMonth] = useState('');
+  const [dobYear, setDobYear] = useState('');
+  
+  const [showDayMenu, setShowDayMenu] = useState(false);
+  const [showMonthMenu, setShowMonthMenu] = useState(false);
+  const [showYearMenu, setShowYearMenu] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
@@ -25,6 +42,7 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
     const user = auth.currentUser;
     if (user) {
       setEmail(user.email || '');
+      setAccountId(user.uid);
       
       const fetchUserData = async () => {
         try {
@@ -34,6 +52,11 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
             const data = docSnap.data();
             setName(data.name || user.displayName || '');
             setPhotoURL(data.photoURL || user.photoURL || '');
+            if (data.dob) {
+              setDobDay(data.dob.day || '');
+              setDobMonth(data.dob.month || '');
+              setDobYear(data.dob.year || '');
+            }
           } else {
             setName(user.displayName || '');
             setPhotoURL(user.photoURL || '');
@@ -48,6 +71,22 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
     }
   }, []);
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Ukuran gambar maksimal 2MB' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPhotoURL(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveProfile = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -61,6 +100,11 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
       await setDoc(doc(db, 'users', user.uid), {
         name,
         photoURL,
+        dob: {
+          day: dobDay,
+          month: dobMonth,
+          year: dobYear
+        },
         updatedAt: new Date()
       }, { merge: true });
 
@@ -121,6 +165,10 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
     }
   };
 
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => (currentYear - i).toString());
+  const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -140,24 +188,35 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
 
       <div className="space-y-6">
         {/* Profile Picture Section */}
-        <div className="flex items-center space-x-6 p-6 rounded-3xl bg-white/5 border border-white/5">
-          <div className="relative group">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden">
+        <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-white/5 border border-white/5">
+          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden border-4 border-[#18181b]">
               {photoURL ? (
                 <img src={photoURL} alt="Profile" className="w-full h-full object-cover" />
               ) : (
-                <User className="w-10 h-10 text-white" />
+                <User className="w-12 h-12 text-white" />
               )}
             </div>
+            <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <Camera className="w-8 h-8 text-white" />
+            </div>
+            <div className="absolute bottom-0 right-0 bg-purple-500 p-2 rounded-full shadow-lg border-2 border-[#18181b]">
+              <Camera className="w-4 h-4 text-white" />
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handlePhotoUpload} 
+              accept="image/*" 
+              className="hidden" 
+            />
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-medium text-white mb-1">Foto Profil</h3>
-            <p className="text-sm text-gray-400">Ganti foto profil dengan memasukkan URL gambar.</p>
-          </div>
+          <h3 className="text-xl font-medium text-white mt-4">{name || 'Pengguna'}</h3>
+          <p className="text-sm text-gray-400 mt-1">{email}</p>
         </div>
 
         {/* Profile Details */}
-        <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
+        <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-1.5">Nama Lengkap</label>
             <div className="relative">
@@ -175,33 +234,140 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1.5">Alamat Email</label>
+            <label className="block text-sm font-medium text-gray-400 mb-1.5">ID Akun</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <Mail className="w-4 h-4 text-gray-500" />
-              </div>
-              <input
-                type="email"
-                value={email}
-                disabled
-                className="w-full bg-black/20 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-gray-500 cursor-not-allowed"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-1.5">URL Foto Profil (Opsional)</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <Camera className="w-4 h-4 text-gray-500" />
+                <Key className="w-4 h-4 text-gray-500" />
               </div>
               <input
                 type="text"
-                value={photoURL}
-                onChange={(e) => setPhotoURL(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
-                placeholder="https://..."
+                value={accountId}
+                readOnly
+                className="w-full bg-black/20 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-gray-400 font-mono text-sm select-all focus:outline-none"
               />
+            </div>
+            <p className="text-xs text-gray-500 mt-1.5">ID unik ini dapat digunakan untuk mengakses fitur premium nantinya.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-1.5">Tanggal Lahir</label>
+            <div className="grid grid-cols-3 gap-3">
+              {/* Day Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDayMenu(!showDayMenu);
+                    setShowMonthMenu(false);
+                    setShowYearMenu(false);
+                  }}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors"
+                >
+                  <span className={dobDay ? 'text-white' : 'text-gray-500'}>{dobDay || 'Hari'}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                </button>
+                <AnimatePresence>
+                  {showDayMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-10 w-full mt-1 bg-[#27272a] border border-white/10 rounded-xl shadow-xl max-h-48 overflow-y-auto"
+                    >
+                      {days.map(d => (
+                        <div
+                          key={d}
+                          onClick={() => {
+                            setDobDay(d);
+                            setShowDayMenu(false);
+                          }}
+                          className={`px-4 py-2 text-sm cursor-pointer hover:bg-white/10 ${dobDay === d ? 'bg-white/5 text-white font-medium' : 'text-gray-300'}`}
+                        >
+                          {d}
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Month Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMonthMenu(!showMonthMenu);
+                    setShowDayMenu(false);
+                    setShowYearMenu(false);
+                  }}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors"
+                >
+                  <span className={dobMonth ? 'text-white text-sm truncate' : 'text-gray-500'}>{dobMonth || 'Bulan'}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                </button>
+                <AnimatePresence>
+                  {showMonthMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-10 w-full mt-1 bg-[#27272a] border border-white/10 rounded-xl shadow-xl max-h-48 overflow-y-auto"
+                    >
+                      {MONTHS.map(m => (
+                        <div
+                          key={m}
+                          onClick={() => {
+                            setDobMonth(m);
+                            setShowMonthMenu(false);
+                          }}
+                          className={`px-4 py-2 text-sm cursor-pointer hover:bg-white/10 ${dobMonth === m ? 'bg-white/5 text-white font-medium' : 'text-gray-300'}`}
+                        >
+                          {m}
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Year Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowYearMenu(!showYearMenu);
+                    setShowDayMenu(false);
+                    setShowMonthMenu(false);
+                  }}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors"
+                >
+                  <span className={dobYear ? 'text-white' : 'text-gray-500'}>{dobYear || 'Tahun'}</span>
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                </button>
+                <AnimatePresence>
+                  {showYearMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute z-10 w-full mt-1 bg-[#27272a] border border-white/10 rounded-xl shadow-xl max-h-48 overflow-y-auto"
+                    >
+                      {years.map(y => (
+                        <div
+                          key={y}
+                          onClick={() => {
+                            setDobYear(y);
+                            setShowYearMenu(false);
+                          }}
+                          className={`px-4 py-2 text-sm cursor-pointer hover:bg-white/10 ${dobYear === y ? 'bg-white/5 text-white font-medium' : 'text-gray-300'}`}
+                        >
+                          {y}
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
 
