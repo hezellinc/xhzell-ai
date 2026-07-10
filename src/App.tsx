@@ -14,6 +14,7 @@ import { NotificationPanel, NotificationItem } from './components/NotificationPa
 import { ProfilePage } from './components/ProfilePage';
 import { HelpPage } from './components/HelpPage';
 import { AboutPage } from './components/AboutPage';
+import { TermsAgreementModal } from './components/TermsAgreementModal';
 
 type Role = 'user' | 'model';
 
@@ -55,12 +56,16 @@ export default function App() {
   const [userName, setUserName] = useState('');
   const [userPhotoURL, setUserPhotoURL] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
+  const [hasAgreedTerms, setHasAgreedTerms] = useState(false);
   
   const [selectedModel, setSelectedModel] = useState('gemini-3.5-flash');
   const [showModelMenu, setShowModelMenu] = useState(false);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const agreed = localStorage.getItem('xhzell_terms_agreed') === 'true';
+      setHasAgreedTerms(agreed);
+      
       if (user) {
         setIsAuthenticated(true);
         let name = user.displayName || user.email?.split('@')[0] || 'User';
@@ -303,6 +308,14 @@ export default function App() {
               timestamp: new Date()
             }]);
           }} />
+        ) : !hasAgreedTerms ? (
+          <TermsAgreementModal 
+            key="terms" 
+            onAgree={() => {
+              setHasAgreedTerms(true);
+              localStorage.setItem('xhzell_terms_agreed', 'true');
+            }} 
+          />
         ) : (
           <motion.div 
             key="app"
