@@ -15,6 +15,7 @@ import { ProfilePage } from './components/ProfilePage';
 import { HelpPage } from './components/HelpPage';
 import { AboutPage } from './components/AboutPage';
 import { TermsAgreementModal } from './components/TermsAgreementModal';
+import { AccountSettings } from './components/settings/AccountSettings';
 
 type Role = 'user' | 'model';
 
@@ -905,17 +906,19 @@ function SwipeableChatHistoryItem({
 }
 
 function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: () => void }) {
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+
   const dummySettings = [
-    { id: 1, icon: <User size={20} />, title: 'Akun' },
-    { id: 2, icon: <Shield size={20} />, title: 'Privasi' },
-    { id: 3, icon: <Bell size={20} />, title: 'Notifikasi' },
-    { id: 4, icon: <Monitor size={20} />, title: 'Tampilan' },
-    { id: 5, icon: <Database size={20} />, title: 'Penyimpanan' },
-    { id: 6, icon: <Globe size={20} />, title: 'Bahasa' },
-    { id: 7, icon: <Key size={20} />, title: 'API Keys' },
-    { id: 8, icon: <Zap size={20} />, title: 'Performa' },
-    { id: 9, icon: <Smartphone size={20} />, title: 'Perangkat' },
-    { id: 10, icon: <Hexagon size={20} />, title: 'Lanjutan' },
+    { id: 'akun', icon: <User size={20} />, title: 'Akun' },
+    { id: 'privasi', icon: <Shield size={20} />, title: 'Privasi' },
+    { id: 'notifikasi', icon: <Bell size={20} />, title: 'Notifikasi' },
+    { id: 'tampilan', icon: <Monitor size={20} />, title: 'Tampilan' },
+    { id: 'penyimpanan', icon: <Database size={20} />, title: 'Penyimpanan' },
+    { id: 'bahasa', icon: <Globe size={20} />, title: 'Bahasa' },
+    { id: 'api-keys', icon: <Key size={20} />, title: 'API Keys' },
+    { id: 'performa', icon: <Zap size={20} />, title: 'Performa' },
+    { id: 'perangkat', icon: <Smartphone size={20} />, title: 'Perangkat' },
+    { id: 'lanjutan', icon: <Hexagon size={20} />, title: 'Lanjutan' },
   ];
 
   return (
@@ -927,46 +930,66 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
       className="absolute inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col p-4 md:p-8 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] overflow-y-auto"
     >
       <div className="w-full max-w-2xl mx-auto flex flex-col mb-12">
-        <div className="flex items-center justify-between mt-8 mb-10">
-          <h2 className="text-3xl font-serif italic text-white tracking-wide">Pengaturan</h2>
-          <motion.button 
-            whileTap={{ scale: 0.9 }} 
-            onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-          >
-            <X className="w-5 h-5 text-gray-200" />
-          </motion.button>
-        </div>
-
-        <div className="flex flex-col space-y-3">
-          {dummySettings.map(setting => (
-            <motion.div 
-              key={setting.id}
-              whileHover={{ scale: 1.01, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-              className="flex items-start p-4 md:p-5 rounded-3xl bg-white/5 border border-white/5 cursor-pointer transition-colors"
+        <AnimatePresence mode="wait">
+          {activeMenu === 'akun' ? (
+            <AccountSettings key="akun" onBack={() => setActiveMenu(null)} onLogout={onLogout} />
+          ) : (
+            <motion.div
+              key="main-menu"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="flex flex-col"
             >
-              <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gray-300 mr-5 flex-shrink-0">
-                {setting.icon}
+              <div className="flex items-center justify-between mt-8 mb-10">
+                <h2 className="text-3xl font-serif italic text-white tracking-wide">Pengaturan</h2>
+                <motion.button 
+                  whileTap={{ scale: 0.9 }} 
+                  onClick={onClose}
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-200" />
+                </motion.button>
               </div>
-              <div className="flex-1 flex flex-col justify-center">
-                <h3 className="text-white font-medium text-lg">{setting.title}</h3>
+
+              <div className="flex flex-col space-y-3">
+                {dummySettings.map(setting => (
+                  <motion.div 
+                    key={setting.id}
+                    onClick={() => {
+                      if (setting.id === 'akun') {
+                        setActiveMenu('akun');
+                      }
+                    }}
+                    whileHover={{ scale: 1.01, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    className="flex items-start p-4 md:p-5 rounded-3xl bg-white/5 border border-white/5 cursor-pointer transition-colors"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gray-300 mr-5 flex-shrink-0">
+                      {setting.icon}
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center">
+                      <h3 className="text-white font-medium text-lg">{setting.title}</h3>
+                    </div>
+                  </motion.div>
+                ))}
+
+                <motion.div 
+                  whileHover={{ scale: 1.01, backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
+                  onClick={onLogout}
+                  className="flex items-start p-4 md:p-5 rounded-3xl bg-red-500/10 border border-red-500/20 cursor-pointer transition-colors mt-8"
+                >
+                  <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 mr-5 flex-shrink-0">
+                    <User size={20} />
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-red-400 font-medium text-lg mb-0.5">Keluar</h3>
+                    <p className="text-red-400/70 text-sm leading-relaxed">Akhiri sesi dan keluar dari akun.</p>
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
-          ))}
-          <motion.div 
-            whileHover={{ scale: 1.01, backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
-            onClick={onLogout}
-            className="flex items-start p-4 md:p-5 rounded-3xl bg-red-500/10 border border-red-500/20 cursor-pointer transition-colors mt-8"
-          >
-            <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 mr-5 flex-shrink-0">
-              <User size={20} />
-            </div>
-            <div className="flex-1 flex flex-col justify-center">
-              <h3 className="text-red-400 font-medium text-lg mb-0.5">Keluar</h3>
-              <p className="text-red-400/70 text-sm leading-relaxed">Akhiri sesi dan keluar dari akun.</p>
-            </div>
-          </motion.div>
-        </div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
