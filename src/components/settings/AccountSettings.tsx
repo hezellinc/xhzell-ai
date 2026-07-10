@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, User, Mail, Camera, Save, Key, Trash2, Calendar, ChevronDown } from 'lucide-react';
+import { ChevronLeft, User, Mail, Camera, Save, Key, Trash2, Calendar, ChevronDown, Pencil, Check } from 'lucide-react';
 import { auth, db } from '../../firebase';
 import { updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -31,6 +31,8 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
 
@@ -113,7 +115,9 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
         updatedAt: new Date()
       }, { merge: true });
 
-      setMessage({ type: 'success', text: 'Profil berhasil diperbarui.' });
+      setIsSaved(true);
+      setIsEditing(false);
+      setTimeout(() => setIsSaved(false), 3000);
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Gagal memperbarui profil.' });
     } finally {
@@ -181,20 +185,46 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
       exit={{ opacity: 0, x: -20 }}
       className="flex flex-col h-full"
     >
-      <div className="flex items-center mb-8">
+      {/* iPhone style blur notification */}
+      <AnimatePresence>
+        {isSaved && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 20, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] flex items-center space-x-3 px-6 py-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-2xl"
+          >
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <Check className="w-4 h-4 text-emerald-400" />
+            </div>
+            <span className="text-white font-medium">Pembaruan berhasil disimpan!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center">
+          <button
+            onClick={onBack}
+            className="mr-4 p-2 rounded-full hover:bg-white/10 transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6 text-gray-300" />
+          </button>
+          <h2 className="text-2xl font-serif italic text-white tracking-wide">Pengaturan Akun</h2>
+        </div>
+        
         <button
-          onClick={onBack}
-          className="mr-4 p-2 rounded-full hover:bg-white/10 transition-colors"
+          onClick={() => setIsEditing(!isEditing)}
+          className={`p-2.5 rounded-full transition-colors ${isEditing ? 'bg-purple-500 text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}
         >
-          <ChevronLeft className="w-6 h-6 text-gray-300" />
+          <Pencil className="w-5 h-5" />
         </button>
-        <h2 className="text-2xl font-serif italic text-white tracking-wide">Pengaturan Akun</h2>
       </div>
 
       <div className="space-y-6">
         {/* Profile Picture Section */}
         <div className="flex flex-col items-center justify-center p-8 rounded-3xl bg-white/5 border border-white/5">
-          <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+          <div className={`relative group ${isEditing ? 'cursor-pointer' : ''}`} onClick={() => isEditing && fileInputRef.current?.click()}>
             <div className="w-28 h-28 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center overflow-hidden border-4 border-[#18181b]">
               {photoURL ? (
                 <img src={photoURL} alt="Profile" className="w-full h-full object-cover" />
@@ -202,18 +232,23 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
                 <User className="w-12 h-12 text-white" />
               )}
             </div>
-            <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Camera className="w-8 h-8 text-white" />
-            </div>
-            <div className="absolute bottom-0 right-0 bg-purple-500 p-2 rounded-full shadow-lg border-2 border-[#18181b]">
-              <Camera className="w-4 h-4 text-white" />
-            </div>
+            {isEditing && (
+              <>
+                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="w-8 h-8 text-white" />
+                </div>
+                <div className="absolute bottom-0 right-0 bg-purple-500 p-2 rounded-full shadow-lg border-2 border-[#18181b]">
+                  <Camera className="w-4 h-4 text-white" />
+                </div>
+              </>
+            )}
             <input 
               type="file" 
               ref={fileInputRef} 
               onChange={handlePhotoUpload} 
               accept="image/*" 
               className="hidden" 
+              disabled={!isEditing}
             />
           </div>
           <h3 className="text-xl font-medium text-white mt-4">{name || 'Pengguna'}</h3>
@@ -232,7 +267,8 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                disabled={!isEditing}
+                className={`w-full bg-black/40 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
                 placeholder="Nama Anda"
               />
             </div>
@@ -261,12 +297,13 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
               <div className="relative">
                 <button
                   type="button"
+                  disabled={!isEditing}
                   onClick={() => {
                     setShowDayMenu(!showDayMenu);
                     setShowMonthMenu(false);
                     setShowYearMenu(false);
                   }}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors"
+                  className={`w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   <span className={dobDay ? 'text-white' : 'text-gray-500'}>{dobDay || 'Hari'}</span>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -300,12 +337,13 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
               <div className="relative">
                 <button
                   type="button"
+                  disabled={!isEditing}
                   onClick={() => {
                     setShowMonthMenu(!showMonthMenu);
                     setShowDayMenu(false);
                     setShowYearMenu(false);
                   }}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors"
+                  className={`w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   <span className={dobMonth ? 'text-white text-sm truncate' : 'text-gray-500'}>{dobMonth || 'Bulan'}</span>
                   <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -339,12 +377,13 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
               <div className="relative">
                 <button
                   type="button"
+                  disabled={!isEditing}
                   onClick={() => {
                     setShowYearMenu(!showYearMenu);
                     setShowDayMenu(false);
                     setShowMonthMenu(false);
                   }}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors"
+                  className={`w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-white flex items-center justify-between focus:outline-none focus:border-purple-500 transition-colors ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   <span className={dobYear ? 'text-white' : 'text-gray-500'}>{dobYear || 'Tahun'}</span>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -379,11 +418,15 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
           <div className="pt-2">
             <button
               onClick={handleSaveProfile}
-              disabled={isSaving}
-              className="flex items-center space-x-2 px-5 py-2.5 bg-white text-black hover:bg-gray-200 rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSaving || !isEditing || isSaved}
+              className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium transition-colors ${
+                isSaved 
+                  ? 'bg-gray-700 text-gray-300 opacity-80 cursor-default'
+                  : 'bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed'
+              }`}
             >
-              <Save className="w-4 h-4" />
-              <span>{isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
+              {isSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              <span>{isSaved ? 'Berhasil disimpan' : isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
             </button>
           </div>
         </div>
