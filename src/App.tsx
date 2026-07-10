@@ -45,6 +45,15 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
+const AI_MODELS = [
+  { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash", provider: "gemini" },
+  { id: "gemini-3.5-pro", label: "Gemini 3.5 Pro", provider: "gemini" },
+  { id: "llama3-70b-8192", label: "Groq: Llama 3 (70B)", provider: "groq" },
+  { id: "mixtral-8x7b-32768", label: "Groq: Mixtral 8x7B", provider: "groq" },
+  { id: "meta-llama/llama-3-8b-instruct:free", label: "OpenRouter: Llama 3 (8B) Free", provider: "openrouter" },
+  { id: "google/gemma-7b-it:free", label: "OpenRouter: Gemma 7B Free", provider: "openrouter" }
+];
+
 export default function App() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -225,11 +234,11 @@ export default function App() {
           parts: parts
         };
       });
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents, model: selectedModel }),
+      const selectedModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents, model: selectedModel, provider: selectedModelObj.provider }),
       });
 
       if (!res.ok) throw new Error('Failed to fetch response');
@@ -755,7 +764,7 @@ export default function App() {
                 className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 transition-colors rounded-full px-3 h-9 md:h-10 border border-white/5 whitespace-nowrap flex-shrink-0"
               >
                 <span className="text-xs md:text-sm font-medium text-gray-200">
-                  {selectedModel === 'gemini-3.5-flash' ? 'xspace 3.5 flash' : 'xspace 2.5 flash'}
+                  {AI_MODELS.find(m => m.id === selectedModel)?.label || "Select Model"}
                 </span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </motion.button>
@@ -769,10 +778,8 @@ export default function App() {
                     transition={{ duration: 0.2 }}
                     className="absolute bottom-full left-0 mb-2 w-48 bg-[#27272a]/95 border border-white/10 rounded-xl shadow-xl backdrop-blur-md overflow-hidden z-50 origin-bottom-left"
                   >
-                    {[
-                      { id: 'gemini-3.5-flash', label: 'xspace 3.5 flash' },
-                      { id: 'gemini-2.5-flash', label: 'xspace 2.5 flash' }
-                    ].map((modelItem) => (
+                    {AI_MODELS.map((modelItem) => (
+
                       <button
                         key={modelItem.id}
                         onClick={() => {
