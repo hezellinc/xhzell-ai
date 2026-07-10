@@ -51,6 +51,9 @@ export default function App() {
   const [userPhotoURL, setUserPhotoURL] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
   
+  const [selectedModel, setSelectedModel] = useState('gemini-3.5-flash');
+  const [showModelMenu, setShowModelMenu] = useState(false);
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -215,7 +218,7 @@ export default function App() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents }),
+        body: JSON.stringify({ contents, model: selectedModel }),
       });
 
       if (!res.ok) throw new Error('Failed to fetch response');
@@ -688,17 +691,58 @@ export default function App() {
           />
           
           <div className="flex items-center justify-between mt-2 flex-wrap gap-2">
-            <div className="flex items-center space-x-2">
-              <motion.button whileTap={{ scale: 0.95 }} className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 transition-colors rounded-full px-3 h-9 md:h-10 border border-white/5 whitespace-nowrap flex-shrink-0">
-                <span className="text-xs md:text-sm font-medium text-gray-200">xhzell_flash</span>
+            <div className="flex items-center space-x-2 relative">
+              <motion.button 
+                whileTap={{ scale: 0.95 }} 
+                onClick={() => {
+                  setShowModelMenu(!showModelMenu);
+                  if (showMoreMenu) setShowMoreMenu(false);
+                  if (showAttachmentMenu) setShowAttachmentMenu(false);
+                }}
+                className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 transition-colors rounded-full px-3 h-9 md:h-10 border border-white/5 whitespace-nowrap flex-shrink-0"
+              >
+                <span className="text-xs md:text-sm font-medium text-gray-200">
+                  {selectedModel === 'gemini-3.5-flash' ? 'gemini 3.5 flash' : 'gemini 2.5 flash'}
+                </span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </motion.button>
+
+              <AnimatePresence>
+                {showModelMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute bottom-full left-0 mb-2 w-48 bg-[#27272a]/95 border border-white/10 rounded-xl shadow-xl backdrop-blur-md overflow-hidden z-50 origin-bottom-left"
+                  >
+                    {[
+                      { id: 'gemini-3.5-flash', label: 'gemini 3.5 flash' },
+                      { id: 'gemini-2.5-flash', label: 'gemini 2.5 flash' }
+                    ].map((modelItem) => (
+                      <button
+                        key={modelItem.id}
+                        onClick={() => {
+                          setSelectedModel(modelItem.id);
+                          setShowModelMenu(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                          selectedModel === modelItem.id ? 'bg-white/10 text-white font-medium' : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                        }`}
+                      >
+                        {modelItem.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               
               <motion.button 
                 whileTap={{ scale: 0.9 }} 
                 onClick={() => {
                   setShowMoreMenu(!showMoreMenu);
                   if (showAttachmentMenu) setShowAttachmentMenu(false);
+                  if (showModelMenu) setShowModelMenu(false);
                 }}
                 className={`flex items-center justify-center w-9 h-9 md:w-10 md:h-10 transition-colors rounded-full border flex-shrink-0 ${showMoreMenu ? 'bg-white/20 border-white/20' : 'bg-white/10 border-white/5 hover:bg-white/20'}`}
               >
@@ -712,6 +756,7 @@ export default function App() {
                 onClick={() => {
                   setShowAttachmentMenu(!showAttachmentMenu);
                   if (showMoreMenu) setShowMoreMenu(false);
+                  if (showModelMenu) setShowModelMenu(false);
                 }}
                 className={`flex items-center justify-center w-9 h-9 md:w-10 md:h-10 transition-colors rounded-full border flex-shrink-0 ${showAttachmentMenu ? 'bg-white/20 border-white/20' : 'bg-white/10 border-white/5 hover:bg-white/20'}`}
               >
