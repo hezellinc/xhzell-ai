@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, User, Mail, Camera, Save, Key, Trash2, Calendar, ChevronDown, Pencil, Check } from 'lucide-react';
 import { auth, db } from '../../firebase';
 import { updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface AccountSettingsProps {
   onBack: () => void;
@@ -77,14 +77,43 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Ukuran gambar maksimal 2MB' });
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Ukuran gambar maksimal 5MB sebelum dikompresi' });
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPhotoURL(reader.result as string);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Convert to base64 with 0.7 quality for JPEG
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+        setPhotoURL(dataUrl);
+      };
+      img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -112,7 +141,7 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
           month: dobMonth,
           year: dobYear
         },
-        updatedAt: new Date()
+        updatedAt: serverTimestamp()
       }, { merge: true });
 
       setIsSaved(true);
