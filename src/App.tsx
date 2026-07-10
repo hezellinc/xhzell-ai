@@ -8,6 +8,7 @@ import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
 import { CanvasBackground } from './components/CanvasBackground';
 import { AILoadingIndicator } from './components/AILoadingIndicator';
+import { HeaderSpotlight } from './components/HeaderSpotlight';
 import { LoginPage } from './components/LoginPage';
 import { NotificationPanel, NotificationItem } from './components/NotificationPanel';
 import { ProfilePage } from './components/ProfilePage';
@@ -415,6 +416,7 @@ export default function App() {
 
       {/* Main Content Wrapper */}
       <div className="relative z-10 flex flex-col flex-1 w-full overflow-hidden">
+        <HeaderSpotlight isLoading={isLoading} />
         {/* Top Navigation */}
       <header className="flex items-center justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] flex-shrink-0 max-w-7xl mx-auto w-full relative">
         <motion.button 
