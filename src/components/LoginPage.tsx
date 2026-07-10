@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, CheckCircle2, ShieldAlert, Eye, EyeOff } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
+import { TermsOfService } from './TermsOfService';
+import { PrivacyPolicy } from './PrivacyPolicy';
 
 interface LoginPageProps {
   onLoginSuccess: (username: string) => void;
@@ -15,6 +17,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+
   
   // Captcha
   const [captchaCode, setCaptchaCode] = useState('');
@@ -88,6 +94,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
+    <>
      <motion.div 
        key="login-page"
        initial={{ opacity: 0 }}
@@ -264,11 +271,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         </div>
         
         {/* Footer */}
-        <footer className="p-6 text-center flex-shrink-0">
+        <footer className="p-6 text-center flex-shrink-0 z-10 relative">
            <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
-             Dengan mendaftar atau login, Anda menyetujui Syarat Penggunaan dan Kebijakan Privasi XhzellAI.
+             Dengan mendaftar atau login, Anda menyetujui{' '}
+             <button onClick={() => setShowTerms(true)} className="text-blue-400 hover:text-blue-300 transition-colors font-medium hover:underline focus:outline-none">Syarat Penggunaan</button>
+             {' '}dan{' '}
+             <button onClick={() => setShowPrivacy(true)} className="text-emerald-400 hover:text-emerald-300 transition-colors font-medium hover:underline focus:outline-none">Kebijakan Privasi</button>
+             {' '}XhzellAI.
            </p>
         </footer>
      </motion.div>
+
+     <AnimatePresence>
+       {showTerms && <TermsOfService onClose={() => setShowTerms(false)} />}
+       {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+     </AnimatePresence>
+    </>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
   ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon,
-  Image as ImageIcon, FileText, Video
+  Image as ImageIcon, FileText, Video, HelpCircle, Info
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
@@ -12,6 +12,8 @@ import { HeaderSpotlight } from './components/HeaderSpotlight';
 import { LoginPage } from './components/LoginPage';
 import { NotificationPanel, NotificationItem } from './components/NotificationPanel';
 import { ProfilePage } from './components/ProfilePage';
+import { HelpPage } from './components/HelpPage';
+import { AboutPage } from './components/AboutPage';
 
 type Role = 'user' | 'model';
 
@@ -47,6 +49,8 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState('');
   const [userPhotoURL, setUserPhotoURL] = useState('');
@@ -327,6 +331,12 @@ export default function App() {
                   }}
                 />
               )}
+              {showHelp && (
+                <HelpPage onClose={() => setShowHelp(false)} />
+              )}
+              {showAbout && (
+                <AboutPage onClose={() => setShowAbout(false)} />
+              )}
               {showNotifications && (
                 <NotificationPanel 
                   notifications={notifications}
@@ -405,6 +415,33 @@ export default function App() {
                     ))}
                   </div>
                 </div>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+                <button
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    setShowHelp(true);
+                  }}
+                  className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-sm"
+                >
+                  <div className="p-1.5 bg-purple-500/20 rounded-lg text-purple-400">
+                    <HelpCircle className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Bantuan & Dukungan</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    setShowAbout(true);
+                  }}
+                  className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-sm"
+                >
+                  <div className="p-1.5 bg-pink-500/20 rounded-lg text-pink-400">
+                    <Info className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Tentang XhzellAI</span>
+                </button>
               </div>
             </motion.div>
           </>
