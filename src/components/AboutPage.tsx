@@ -55,7 +55,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
             </div>
             <div className="flex justify-between">
               <span>Ditenagai Oleh</span>
-              <span className="text-gray-200">Gemini Models</span>
+              <span className="text-gray-200">Xspace Models</span>
             </div>
             <div className="flex justify-between">
               <span>Hak Cipta</span>
