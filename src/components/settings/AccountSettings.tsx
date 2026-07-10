@@ -95,7 +95,12 @@ export const AccountSettings: React.FC<AccountSettingsProps> = ({ onBack, onLogo
     setMessage(null);
 
     try {
-      await updateProfile(user, { displayName: name, photoURL });
+      let authUpdateData: any = { displayName: name };
+      if (!photoURL.startsWith('data:image')) {
+        authUpdateData.photoURL = photoURL;
+      }
+      
+      await updateProfile(user, authUpdateData);
       
       await setDoc(doc(db, 'users', user.uid), {
         name,
