@@ -241,13 +241,17 @@ export default function App() {
         body: JSON.stringify({ contents, model: selectedModel, provider: selectedModelObj.provider }),
       });
 
-      if (!res.ok) throw new Error('Failed to fetch response');
-      
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Server sedang sibuk. Silakan coba beberapa saat lagi.');
+      }
+      
       updateActiveChatMessages([...newMessages, { role: 'model', text: data.text }]);
-    } catch (error) {
-      console.error(error);
-      updateActiveChatMessages([...newMessages, { role: 'model', text: 'Maaf, terjadi kesalahan saat memproses permintaan Anda.' }]);
+    } catch (error: any) {
+      console.error("Chat Error:", error);
+      const errorMessage = error.message || "Server sedang sibuk. Silakan coba beberapa saat lagi.";
+      updateActiveChatMessages([...newMessages, { role: 'model', text: errorMessage }]);
     } finally {
       setIsLoading(false);
     }

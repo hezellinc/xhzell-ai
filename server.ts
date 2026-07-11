@@ -103,8 +103,11 @@ app.post("/api/chat", async (req, res) => {
       res.status(400).json({ error: "Invalid provider selected" });
     }
   } catch (error: any) {
-    console.error("API Error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate content" });
+    // Log detail ke backend console (Vercel logs) untuk memudahkan debugging
+    console.error(`[API Error - ${selectedProvider} - ${selectedModel}]:`, error.response?.data || error.message || error);
+    
+    // Kirim pesan ramah ke frontend
+    res.status(500).json({ error: "Server sedang sibuk. Silakan coba beberapa saat lagi." });
   }
 });
 
