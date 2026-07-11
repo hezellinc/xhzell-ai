@@ -29,11 +29,13 @@ export const app = express();
 app.use(express.json({ limit: '50mb' }));
 
 app.post("/api/chat", async (req, res) => {
+  let selectedProvider = "gemini";
+  let selectedModel = "gemini-3.5-flash";
   try {
     const { contents, model, provider } = req.body;
     
-    const selectedProvider = provider || "gemini";
-    const selectedModel = model || "gemini-3.5-flash";
+    if (provider) selectedProvider = provider;
+    if (model) selectedModel = model;
     const systemPrompt = "You are Xhzell AI. You were created by Xhzell. You are a helpful, versatile, and proactive AI assistant. You not only provide answers but can also perform tasks, ask clarifying questions, and offer suggestions to the user. Never mention that you are a language model trained by Google, DeepMind, or any other entity.";
 
     if (selectedProvider === "gemini") {
