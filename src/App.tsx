@@ -47,11 +47,10 @@ import { auth, db } from './firebase';
 
 const AI_MODELS = [
   { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash", provider: "gemini" },
-  { id: "gemini-3.5-pro", label: "Gemini 3.5 Pro", provider: "gemini" },
-  { id: "llama3-70b-8192", label: "Groq: Llama 3 (70B)", provider: "groq" },
-  { id: "mixtral-8x7b-32768", label: "Groq: Mixtral 8x7B", provider: "groq" },
-  { id: "meta-llama/llama-3-8b-instruct:free", label: "OpenRouter: Llama 3 (8B) Free", provider: "openrouter" },
-  { id: "google/gemma-7b-it:free", label: "OpenRouter: Gemma 7B Free", provider: "openrouter" }
+  { id: "openai", label: "GPT-4o", provider: "pollinations" },
+  { id: "mistral", label: "Mistral", provider: "pollinations" },
+  { id: "llama", label: "Llama 3", provider: "pollinations" },
+  { id: "qwen-coder", label: "Qwen Coder", provider: "pollinations" }
 ];
 
 export default function App() {
@@ -767,7 +766,7 @@ export default function App() {
                 }}
                 className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 transition-colors rounded-full px-3 h-9 md:h-10 border border-white/5 whitespace-nowrap flex-shrink-0"
               >
-                <span className="text-xs md:text-sm font-medium text-gray-200">
+                <span className="text-xs md:text-sm font-medium text-gray-200 truncate max-w-[80px] md:max-w-[120px] inline-block align-bottom">
                   {AI_MODELS.find(m => m.id === selectedModel)?.label || "Select Model"}
                 </span>
                 <ChevronDown className="w-4 h-4 text-gray-400" />

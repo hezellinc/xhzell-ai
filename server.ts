@@ -15,14 +15,9 @@ const ai = new GoogleGenAI({
   }
 });
 
-const groq = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY || "dummy",
-  baseURL: "https://api.groq.com/openai/v1",
-});
-
-const openrouter = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY || "dummy",
-  baseURL: "https://openrouter.ai/api/v1",
+const pollinations = new OpenAI({
+  apiKey: "dummy-key",
+  baseURL: "https://text.pollinations.ai/openai",
 });
 
 export const app = express();
@@ -36,6 +31,7 @@ app.post("/api/chat", async (req, res) => {
     
     if (provider) selectedProvider = provider;
     if (model) selectedModel = model;
+    
     const systemPrompt = "You are Xhzell AI. You were created by Xhzell. You are a helpful, versatile, and proactive AI assistant. You not only provide answers but can also perform tasks, ask clarifying questions, and offer suggestions to the user. Never mention that you are a language model trained by Google, DeepMind, or any other entity.";
 
     if (selectedProvider === "gemini") {
@@ -47,12 +43,7 @@ app.post("/api/chat", async (req, res) => {
         }
       });
       res.json({ text: response.text });
-    } else if (selectedProvider === "groq") {
-      // Allow overriding key via headers for "modal API gratisan" directly from client if they set it
-      const apiKey = req.headers['x-api-key'] || process.env.GROQ_API_KEY;
-      if (!apiKey) throw new Error("GROQ API KEY is not configured");
-      const client = req.headers['x-api-key'] ? new OpenAI({ apiKey: apiKey as string, baseURL: "https://api.groq.com/openai/v1" }) : groq;
-
+    } else if (selectedProvider === "pollinations") {
       const messages = [{ role: "system", content: systemPrompt }];
       
       if (typeof contents === "string") {
@@ -67,40 +58,13 @@ app.post("/api/chat", async (req, res) => {
         }
       }
 
-      const response = await client.chat.completions.create({
+      const response = await pollinations.chat.completions.create({
         model: selectedModel,
         messages: messages as any,
+        temperature: 0.7,
       });
       res.json({ text: response.choices[0].message.content });
       
-    } else if (selectedProvider === "openrouter") {
-      const apiKey = req.headers['x-api-key'] || process.env.OPENROUTER_API_KEY;
-      if (!apiKey) throw new Error("OPENROUTER API KEY is not configured");
-      const client = req.headers['x-api-key'] ? new OpenAI({ apiKey: apiKey as string, baseURL: "https://openrouter.ai/api/v1" }) : openrouter;
-
-      const messages = [{ role: "system", content: systemPrompt }];
-      
-      if (typeof contents === "string") {
-        messages.push({ role: "user", content: contents });
-      } else if (Array.isArray(contents)) {
-        for (const msg of contents) {
-          if (msg.role === "user" || msg.role === "model") {
-             const role = msg.role === "model" ? "assistant" : "user";
-             const content = Array.isArray(msg.parts) ? msg.parts.map((p: any) => p.text).join("\n") : msg.parts?.text || String(msg);
-             messages.push({ role, content });
-          }
-        }
-      }
-
-      const response = await client.chat.completions.create({
-        model: selectedModel,
-        messages: messages as any,
-        headers: {
-          "HTTP-Referer": "https://xhzell.com", 
-          "X-Title": "Xhzell AI", 
-        }
-      } as any);
-      res.json({ text: response.choices[0].message.content });
     } else {
       res.status(400).json({ error: "Invalid provider selected" });
     }
