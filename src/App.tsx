@@ -46,13 +46,9 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-3.5-flash", label: "Gemini 3.5 Flash", provider: "gemini" },
-  { id: "openai", label: "GPT-4o", provider: "pollinations" },
-  { id: "mistral", label: "Mistral", provider: "pollinations" },
-  { id: "llama", label: "Llama 3", provider: "pollinations" },
-  { id: "qwen-coder", label: "Qwen Coder", provider: "pollinations" }
+  { id: "gemini-3.5-flash", label: "xsp-3pro", provider: "gemini" },
+  { id: "openai", label: "xsp-coder", provider: "pollinations" }
 ];
-
 export default function App() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -109,9 +105,18 @@ export default function App() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   
-  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([
-    { id: '1', title: 'Percakapan baru', isFavorite: false, messages: [] },
-  ]);
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>(() => {
+    const saved = localStorage.getItem("xhzell_chat_history");
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return [{ id: "1", title: "Percakapan baru", isFavorite: false, messages: [] }];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("xhzell_chat_history", JSON.stringify(chatHistory));
+  }, [chatHistory]);
+
 
   const activeChat = chatHistory.find(c => c.id === activeChatId) || chatHistory[0] || { id: 'fallback', title: 'Percakapan baru', isFavorite: false, messages: [] };
   const messages = activeChat.messages;
@@ -625,13 +630,20 @@ export default function App() {
                       {msg.text && <div className="whitespace-pre-wrap font-sans text-[15px] md:text-base tracking-wide">{msg.text}</div>}
                     </div>
                   ) : (
-                    <div className="markdown-body prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 prose-headings:font-semibold prose-a:text-purple-400 font-sans text-[15px] md:text-base tracking-wide">
-                      <Markdown>{msg.text}</Markdown>
+                    <div className="flex flex-col gap-2">
+                      <div className="text-xs font-medium text-gray-400 bg-white/5 inline-flex items-center self-start px-2 py-1 rounded-md border border-white/10 mb-1">
+                        <Sparkles size={12} className="mr-1.5 text-purple-400" />
+                        {AI_MODELS.find(m => m.id === selectedModel)?.label || "AI"}
+                      </div>
+                      <div className="markdown-body prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 prose-headings:font-semibold prose-a:text-purple-400 font-sans text-[15px] md:text-base tracking-wide">
+                        <Markdown>{msg.text}</Markdown>
+                      </div>
                     </div>
                   )}
-                </div>
+                  </div>
               </motion.div>
             ))}
+
             </AnimatePresence>
             {isLoading && (
               <div className="flex w-full justify-start mt-2">
@@ -788,7 +800,9 @@ export default function App() {
                         onClick={() => {
                           setSelectedModel(modelItem.id);
                           setShowModelMenu(false);
+                          handleNewChat();
                         }}
+
                         className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                           selectedModel === modelItem.id ? 'bg-white/10 text-white font-medium' : 'text-gray-300 hover:bg-white/5 hover:text-white'
                         }`}
