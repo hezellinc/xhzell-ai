@@ -67,3 +67,19 @@ html, body {
   pointer-events: none;
 }
 
+
+/* Hardware acceleration optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+}
+
+.transform-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

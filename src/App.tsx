@@ -399,7 +399,7 @@ export default function App() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-110%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-2 left-2 bottom-2 md:top-4 md:left-4 md:bottom-4 w-72 md:w-80 z-50 bg-[#18181b]/70 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 flex flex-col shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+              className="absolute top-2 left-2 bottom-2 transform-gpu will-change-transform will-change-opacity md:top-4 md:left-4 md:bottom-4 w-72 md:w-80 z-50 bg-[#18181b]/70 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 flex flex-col shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
@@ -593,7 +593,7 @@ export default function App() {
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="max-w-3xl mx-auto space-y-6 w-full pb-10"
+              className="max-w-3xl mx-auto space-y-6 w-full pb-10 transform-gpu will-change-transform will-change-opacity"
             >
               <AnimatePresence initial={false}>
                 {messages.map((msg, idx) => (
@@ -602,7 +602,7 @@ export default function App() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
-                    className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex w-full transform-gpu will-change-transform will-change-opacity ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div 
                       className={`
@@ -660,7 +660,7 @@ export default function App() {
 
       {/* Bottom Input Area */}
       <div className="w-full p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-6 md:pb-[max(2rem,env(safe-area-inset-bottom))] flex justify-center flex-shrink-0 relative z-10">
-        <div className="w-full max-w-3xl relative bg-[#18181b]/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-[#18181b] focus-within:border-white/20">
+        <div className="w-full max-w-3xl relative transform-gpu bg-[#18181b]/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-[#18181b] focus-within:border-white/20">
           <AnimatePresence>
             {showAttachmentMenu && (
               <motion.div
@@ -951,7 +951,7 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: '20px' }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="absolute inset-0 z-[200] bg-black/90 backdrop-blur-md flex flex-col p-4 md:p-8 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] overflow-y-auto"
+      className="absolute inset-0 z-[200] bg-black/90 transform-gpu will-change-transform will-change-opacity backdrop-blur-md flex flex-col p-4 md:p-8 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] overflow-y-auto"
     >
       <div className="w-full max-w-2xl mx-auto flex flex-col mb-12">
         <AnimatePresence mode="wait">
