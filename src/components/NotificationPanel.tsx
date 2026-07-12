@@ -8,6 +8,8 @@ export interface NotificationItem {
   message: string;
   isRead: boolean;
   timestamp: Date;
+  action?: () => void;
+  actionLabel?: string;
 }
 
 interface NotificationPanelProps {
@@ -80,6 +82,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                 <div className="pl-4 pr-6">
                   <h4 className={`text-sm font-medium ${notif.isRead ? 'text-gray-300' : 'text-white'}`}>{notif.title}</h4>
                   <p className={`text-xs mt-1 ${notif.isRead ? 'text-gray-500' : 'text-gray-400'}`}>{notif.message}</p>
+                  {notif.action && <button onClick={(e) => { e.stopPropagation(); notif.action!(); }} className="mt-2 text-xs font-semibold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors text-white">{notif.actionLabel || "Aksi"}</button>}
                 </div>
                 <button 
                   onClick={(e) => { e.stopPropagation(); onDelete(notif.id); }}
