@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
   ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon,
-  Image as ImageIcon, FileText, Video, HelpCircle, Info
+  Image as ImageIcon, FileText, Video, HelpCircle, Info, Film
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
@@ -15,6 +15,7 @@ import { ProfilePage } from './components/ProfilePage';
 import { HelpPage } from './components/HelpPage';
 import { AboutPage } from './components/AboutPage';
 import { TermsAgreementModal } from './components/TermsAgreementModal';
+import { PromoAnimation } from './components/PromoAnimation';
 import { AccountSettings } from './components/settings/AccountSettings';
 
 type Role = 'user' | 'model';
@@ -1041,6 +1042,7 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
     { id: 'performa', icon: <Zap size={20} />, title: 'Performa' },
     { id: 'perangkat', icon: <Smartphone size={20} />, title: 'Perangkat' },
     { id: 'lanjutan', icon: <Hexagon size={20} />, title: 'Lanjutan' },
+    { id: 'galeri', icon: <Film size={20} />, title: 'Galeri' },
   ];
 
   return (
@@ -1055,6 +1057,8 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
         <AnimatePresence mode="wait">
           {activeMenu === 'akun' ? (
             <AccountSettings key="akun" onBack={() => setActiveMenu(null)} onLogout={onLogout} />
+          ) : activeMenu === 'galeri' ? (
+            <PromoAnimation key="galeri" onClose={() => setActiveMenu(null)} />
           ) : (
             <motion.div
               key="main-menu"
@@ -1079,8 +1083,8 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
                   <motion.div 
                     key={setting.id}
                     onClick={() => {
-                      if (setting.id === 'akun') {
-                        setActiveMenu('akun');
+                      if (setting.id === 'akun' || setting.id === 'galeri') {
+                        setActiveMenu(setting.id);
                       }
                     }}
                     whileHover={{ scale: 1.01, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
