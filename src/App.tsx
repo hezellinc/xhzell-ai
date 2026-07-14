@@ -501,9 +501,12 @@ export default function App() {
               className="absolute top-2 left-2 bottom-2 transform-gpu will-change-transform will-change-opacity md:top-4 md:left-4 md:bottom-4 w-72 md:w-80 z-50 bg-[#18181b]/70 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 flex flex-col shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
             >
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
-                  XhzellAI
-                </h2>
+                <div className="flex items-center gap-2">
+                  <img src="/logo-app.png" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover" />
+                  <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
+                    XhzellAI
+                  </h2>
+                </div>
                 <motion.button 
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setIsSidebarOpen(false)}

@@ -120,9 +120,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
         {/* Header */}
         <header className="flex items-center justify-between p-6 w-full flex-shrink-0">
-           <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
-              XhzellAI
-           </h2>
+           <div className="flex items-center gap-2">
+              <img src="/logo-app.png" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover" />
+              <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
+                XhzellAI
+              </h2>
+            </div>
            <button 
              onClick={() => { setIsLogin(!isLogin); generateCaptcha(); }}
              className="px-5 py-2 rounded-full border border-white/40 text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
