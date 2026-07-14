@@ -1127,10 +1127,10 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
 function AnimatedBackground() {
   return (
     <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-[#000000]">
-      <div className="absolute inset-0 opacity-40 mix-blend-screen transform-gpu">
-        <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-purple-600/20 rounded-full blur-[80px] animate-blob transform-gpu" />
-        <div className="absolute top-1/3 right-1/4 w-[35vw] h-[35vw] bg-pink-600/20 rounded-full blur-[80px] animate-blob animation-delay-2000 transform-gpu" />
-        <div className="absolute bottom-1/4 left-1/3 w-[45vw] h-[45vw] bg-blue-600/20 rounded-full blur-[80px] animate-blob animation-delay-4000 transform-gpu" />
+      <div className="absolute inset-0 opacity-80 mix-blend-screen transform-gpu">
+        <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-purple-600/40 rounded-full blur-[80px] animate-blob transform-gpu" />
+        <div className="absolute top-1/3 right-1/4 w-[35vw] h-[35vw] bg-pink-600/40 rounded-full blur-[80px] animate-blob animation-delay-2000 transform-gpu" />
+        <div className="absolute bottom-1/4 left-1/3 w-[45vw] h-[45vw] bg-blue-600/40 rounded-full blur-[80px] animate-blob animation-delay-4000 transform-gpu" />
       </div>
     </div>
   );
