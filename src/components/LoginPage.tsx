@@ -121,7 +121,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* Header */}
         <header className="flex items-center justify-between p-6 w-full flex-shrink-0">
            <div className="flex items-center gap-2">
-              <img src="/logo-app.png" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover" />
+              <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover" />
               <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
                 XhzellAI
               </h2>
