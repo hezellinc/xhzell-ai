@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, Shield, Eye, Database, Trash2, History, AlertTriangle } from 'lucide-react';
 
 interface PrivacySettingsProps {
