@@ -17,6 +17,7 @@ import { AboutPage } from './components/AboutPage';
 import { TermsAgreementModal } from './components/TermsAgreementModal';
 import { PromoAnimation } from './components/PromoAnimation';
 import { AccountSettings } from './components/settings/AccountSettings';
+import { PrivacySettings } from './components/settings/PrivacySettings';
 
 type Role = 'user' | 'model';
 
@@ -1060,6 +1061,8 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
         <AnimatePresence mode="wait">
           {activeMenu === 'akun' ? (
             <AccountSettings key="akun" onBack={() => setActiveMenu(null)} onLogout={onLogout} />
+          ) : activeMenu === 'privasi' ? (
+            <PrivacySettings key="privasi" onBack={() => setActiveMenu(null)} />
           ) : activeMenu === 'galeri' ? (
             <PromoAnimation key="galeri" onClose={() => setActiveMenu(null)} />
           ) : (
