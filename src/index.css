@@ -40,16 +40,35 @@
   --theme-gray-300: #d1d5db;
   --theme-gray-400: #9ca3af;
   --theme-gray-500: #6b7280;
+
+  /* Force override Tailwind v4 internal colors */
+  --color-white: var(--theme-white);
+  --color-black: var(--theme-black);
+  --color-zinc-900: var(--theme-zinc-900);
+  --color-gray-200: var(--theme-gray-200);
+  --color-gray-300: var(--theme-gray-300);
+  --color-gray-400: var(--theme-gray-400);
+  --color-gray-500: var(--theme-gray-500);
 }
 
 :root.light-mode {
-  --theme-white: #1f2937; /* Dark text for light mode */
+  --theme-white: #111827; /* Dark text for light mode */
   --theme-black: #f3f4f6; /* Soft light gray background */
   --theme-zinc-900: #ffffff; /* White cards */
-  --theme-gray-200: #e5e7eb; /* Muted text/borders */
-  --theme-gray-300: #d1d5db;
-  --theme-gray-400: #6b7280;
-  --theme-gray-500: #4b5563;
+  /* Invert grays for better contrast in light mode */
+  --theme-gray-200: #4b5563; 
+  --theme-gray-300: #374151;
+  --theme-gray-400: #1f2937;
+  --theme-gray-500: #111827;
+
+  /* Force override Tailwind v4 internal colors in light mode */
+  --color-white: var(--theme-white);
+  --color-black: var(--theme-black);
+  --color-zinc-900: var(--theme-zinc-900);
+  --color-gray-200: var(--theme-gray-200);
+  --color-gray-300: var(--theme-gray-300);
+  --color-gray-400: var(--theme-gray-400);
+  --color-gray-500: var(--theme-gray-500);
 }
 
 /* Font handling overrides */
