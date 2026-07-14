@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
-  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon,
+  ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon, ChevronRight,
   Image as ImageIcon, FileText, Video, HelpCircle, Info, Film
 } from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -1035,18 +1035,38 @@ function SwipeableChatHistoryItem({
 function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: () => void }) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
-  const dummySettings = [
-    { id: 'akun', icon: <User size={20} />, title: 'Akun' },
-    { id: 'privasi', icon: <Shield size={20} />, title: 'Privasi' },
-    { id: 'notifikasi', icon: <Bell size={20} />, title: 'Notifikasi' },
-    { id: 'tampilan', icon: <Monitor size={20} />, title: 'Tampilan' },
-    { id: 'penyimpanan', icon: <Database size={20} />, title: 'Penyimpanan' },
-    { id: 'bahasa', icon: <Globe size={20} />, title: 'Bahasa' },
-    { id: 'api-keys', icon: <Key size={20} />, title: 'API Keys' },
-    { id: 'performa', icon: <Zap size={20} />, title: 'Performa' },
-    { id: 'perangkat', icon: <Smartphone size={20} />, title: 'Perangkat' },
-    { id: 'lanjutan', icon: <Hexagon size={20} />, title: 'Lanjutan' },
-    { id: 'galeri', icon: <Film size={20} />, title: 'Galeri' },
+  const settingGroups = [
+    {
+      title: 'Akun & Keamanan',
+      items: [
+        { id: 'akun', icon: <User size={20} className="text-blue-400" />, title: 'Akun', description: 'Kelola informasi profil dan kredensial Anda.' },
+        { id: 'privasi', icon: <Shield size={20} className="text-pink-400" />, title: 'Privasi', description: 'Atur data, pelacakan, dan riwayat aktivitas.' },
+      ]
+    },
+    {
+      title: 'Preferensi Aplikasi',
+      items: [
+        { id: 'tampilan', icon: <Monitor size={20} className="text-purple-400" />, title: 'Tampilan', description: 'Sesuaikan tema, warna, dan tata letak aplikasi.' },
+        { id: 'notifikasi', icon: <Bell size={20} className="text-amber-400" />, title: 'Notifikasi', description: 'Atur pemberitahuan dan suara peringatan.' },
+        { id: 'bahasa', icon: <Globe size={20} className="text-emerald-400" />, title: 'Bahasa', description: 'Pilih bahasa utama aplikasi.' },
+      ]
+    },
+    {
+      title: 'Sistem & Perangkat',
+      items: [
+        { id: 'penyimpanan', icon: <Database size={20} className="text-orange-400" />, title: 'Penyimpanan', description: 'Kelola cache dan ruang penyimpanan lokal.' },
+        { id: 'performa', icon: <Zap size={20} className="text-yellow-400" />, title: 'Performa', description: 'Optimalkan kecepatan dan penggunaan memori.' },
+        { id: 'perangkat', icon: <Smartphone size={20} className="text-indigo-400" />, title: 'Perangkat', description: 'Lihat sesi aktif di perangkat lain.' },
+      ]
+    },
+    {
+      title: 'Lanjutan',
+      items: [
+        { id: 'api-keys', icon: <Key size={20} className="text-gray-400" />, title: 'API Keys', description: 'Kelola kunci akses pihak ketiga.' },
+        { id: 'lanjutan', icon: <Hexagon size={20} className="text-cyan-400" />, title: 'Lanjutan', description: 'Pengaturan developer dan eksperimental.' },
+        { id: 'galeri', icon: <Film size={20} className="text-rose-400" />, title: 'Galeri', description: 'Fitur promosi dan tampilan khusus.' },
+      ]
+    }
   ];
 
   return (
@@ -1073,7 +1093,7 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
               exit={{ opacity: 0, x: 20 }}
               className="flex flex-col"
             >
-              <div className="flex items-center justify-between mt-8 mb-10">
+              <div className="flex items-center justify-between mt-8 mb-8">
                 <h2 className="text-3xl font-serif italic text-white tracking-wide">Pengaturan</h2>
                 <motion.button 
                   whileTap={{ scale: 0.9 }} 
@@ -1084,38 +1104,47 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
                 </motion.button>
               </div>
 
-              <div className="flex flex-col space-y-3">
-                {dummySettings.map(setting => (
-                  <motion.div 
-                    key={setting.id}
-                    onClick={() => {
-                      if (setting.id === 'akun' || setting.id === 'galeri' || setting.id === 'privasi') {
-                        setActiveMenu(setting.id);
-                      }
-                    }}
-                    whileHover={{ scale: 1.01, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                    className="flex items-start p-4 md:p-5 rounded-3xl bg-white/5 border border-white/5 cursor-pointer transition-colors"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-gray-300 mr-5 flex-shrink-0">
-                      {setting.icon}
+              <div className="flex flex-col space-y-8">
+                {settingGroups.map((group, groupIdx) => (
+                  <div key={groupIdx} className="flex flex-col">
+                    <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3 px-2">{group.title}</h3>
+                    <div className="bg-[#18181b] border border-white/5 rounded-3xl overflow-hidden flex flex-col">
+                      {group.items.map((setting, itemIdx) => (
+                        <motion.div 
+                          key={setting.id}
+                          onClick={() => {
+                            if (setting.id === 'akun' || setting.id === 'galeri' || setting.id === 'privasi') {
+                              setActiveMenu(setting.id);
+                            }
+                          }}
+                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.04)' }}
+                          className={`flex items-center p-4 md:p-5 cursor-pointer transition-colors relative ${itemIdx !== group.items.length - 1 ? 'border-b border-white/5' : ''}`}
+                        >
+                          <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center mr-4 flex-shrink-0">
+                            {setting.icon}
+                          </div>
+                          <div className="flex-1 flex flex-col pr-4">
+                            <h4 className="text-white font-medium text-[15px]">{setting.title}</h4>
+                            <p className="text-gray-400 text-xs mt-0.5 line-clamp-1">{setting.description}</p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                        </motion.div>
+                      ))}
                     </div>
-                    <div className="flex-1 flex flex-col justify-center">
-                      <h3 className="text-white font-medium text-lg">{setting.title}</h3>
-                    </div>
-                  </motion.div>
+                  </div>
                 ))}
 
                 <motion.div 
                   whileHover={{ scale: 1.01, backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
                   onClick={onLogout}
-                  className="flex items-start p-4 md:p-5 rounded-3xl bg-red-500/10 border border-red-500/20 cursor-pointer transition-colors mt-8"
+                  className="flex items-center p-4 md:p-5 rounded-3xl bg-red-500/10 border border-red-500/20 cursor-pointer transition-colors mt-4"
                 >
-                  <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 mr-5 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-500/20 flex items-center justify-center text-red-400 mr-4 flex-shrink-0">
                     <User size={20} />
                   </div>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <h3 className="text-red-400 font-medium text-lg mb-0.5">Keluar</h3>
-                    <p className="text-red-400/70 text-sm leading-relaxed">Akhiri sesi dan keluar dari akun.</p>
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="text-red-400 font-medium text-[15px]">Keluar Akun</h3>
+                    <p className="text-red-400/70 text-xs mt-0.5">Akhiri sesi di perangkat ini</p>
                   </div>
                 </motion.div>
               </div>
