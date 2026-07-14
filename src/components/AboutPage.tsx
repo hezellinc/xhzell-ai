@@ -37,8 +37,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
         </div>
         
         <div className="p-8 text-center flex flex-col items-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg flex items-center justify-center mb-6 transform rotate-3">
-            <Sparkles className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 rounded-2xl shadow-lg flex items-center justify-center mb-6 overflow-hidden border border-white/20">
+            <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-full h-full object-cover" />
           </div>
           
           <h1 className="text-2xl font-semibold text-white mb-2">XhzellAI</h1>

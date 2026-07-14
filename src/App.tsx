@@ -570,8 +570,8 @@ export default function App() {
                   }}
                   className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-sm"
                 >
-                  <div className="p-1 flex items-center justify-center">
-                    <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-5 h-5 rounded-full object-cover" />
+                  <div className="p-1.5 bg-pink-500/20 rounded-lg text-pink-400">
+                    <Info className="w-4 h-4" />
                   </div>
                   <span className="font-medium">Tentang XhzellAI</span>
                 </button>
