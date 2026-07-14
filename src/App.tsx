@@ -1089,7 +1089,7 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
                   <motion.div 
                     key={setting.id}
                     onClick={() => {
-                      if (setting.id === 'akun' || setting.id === 'galeri') {
+                      if (setting.id === 'akun' || setting.id === 'galeri' || setting.id === 'privasi') {
                         setActiveMenu(setting.id);
                       }
                     }}
