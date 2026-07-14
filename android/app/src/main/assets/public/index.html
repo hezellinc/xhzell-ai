@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>XhzellAI Assistant</title>
+    <meta name="description" content="Assistant cerdas berbasis AI dengan fitur chat dan image generation." />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="XhzellAI Assistant" />
+    <meta property="og:description" content="Assistant cerdas berbasis AI dengan fitur chat dan image generation." />
+    <meta property="og:image" content="/logo-app.jpg" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="XhzellAI Assistant" />
+    <meta property="twitter:description" content="Assistant cerdas berbasis AI dengan fitur chat dan image generation." />
+    <meta property="twitter:image" content="/logo-app.jpg" />
+
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/jpeg" href="/logo-app.jpg" />
+    <link rel="apple-touch-icon" href="/logo-app.jpg" />
+    <script type="module" crossorigin src="/assets/index-CYi-mPGs.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-fZ5IMgzw.css">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('SW registered:', registration.scope);
+          }).catch(error => {
+            console.log('SW registration failed:', error);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1125,93 +1125,14 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
 }
 
 function AnimatedBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d', { alpha: false });
-    if (!ctx) return;
-
-    let animationFrameId: number;
-    let time = 0;
-    
-    // Use a lower resolution multiplier to improve performance drastically on mobile
-    const resolution = window.innerWidth < 768 ? 0.5 : 0.75;
-
-    const resize = () => {
-      canvas.width = window.innerWidth * resolution;
-      canvas.height = window.innerHeight * resolution;
-    };
-
-    window.addEventListener('resize', resize);
-    resize();
-
-    const render = () => {
-      // Slower animation on mobile
-      time += window.innerWidth < 768 ? 0.003 : 0.005;
-      const width = canvas.width;
-      const height = canvas.height;
-      
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, width, height);
-
-      const minDim = Math.min(width, height);
-      
-      // Blob 1 (Purple/Blue mix)
-      const x1 = width / 2 + Math.sin(time) * minDim * 0.3;
-      const y1 = height / 2 + Math.cos(time * 0.8) * minDim * 0.3;
-      const r1 = minDim * 0.7;
-      
-      const g1 = ctx.createRadialGradient(x1, y1, 0, x1, y1, r1);
-      g1.addColorStop(0, 'rgba(147, 51, 234, 0.15)');
-      g1.addColorStop(0.5, 'rgba(59, 130, 246, 0.05)');
-      g1.addColorStop(1, 'rgba(147, 51, 234, 0)');
-      
-      ctx.fillStyle = g1;
-      ctx.fillRect(0, 0, width, height);
-
-      // Blob 2 (Pink/Orange mix)
-      const x2 = width / 2 + Math.sin(time * 1.2 + Math.PI) * minDim * 0.25;
-      const y2 = height / 2 + Math.cos(time * 0.9 + Math.PI) * minDim * 0.25;
-      const r2 = minDim * 0.65;
-      
-      const g2 = ctx.createRadialGradient(x2, y2, 0, x2, y2, r2);
-      g2.addColorStop(0, 'rgba(236, 72, 153, 0.12)');
-      g2.addColorStop(0.5, 'rgba(249, 115, 22, 0.04)');
-      g2.addColorStop(1, 'rgba(236, 72, 153, 0)');
-      
-      ctx.fillStyle = g2;
-      ctx.fillRect(0, 0, width, height);
-      
-      // Blob 3 (Blue accent)
-      const x3 = width / 2 + Math.sin(time * 0.7 + Math.PI / 2) * minDim * 0.35;
-      const y3 = height / 2 + Math.cos(time * 1.1 + Math.PI / 2) * minDim * 0.35;
-      const r3 = minDim * 0.6;
-      
-      const g3 = ctx.createRadialGradient(x3, y3, 0, x3, y3, r3);
-      g3.addColorStop(0, 'rgba(59, 130, 246, 0.12)');
-      g3.addColorStop(1, 'rgba(59, 130, 246, 0)');
-      
-      ctx.fillStyle = g3;
-      ctx.fillRect(0, 0, width, height);
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      window.removeEventListener('resize', resize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
   return (
-    <canvas 
-      ref={canvasRef} 
-      className="absolute inset-0 pointer-events-none z-0 opacity-80 w-full h-full"
-    />
+    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-[#000000]">
+      <div className="absolute inset-0 opacity-40 mix-blend-screen transform-gpu">
+        <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-purple-600/20 rounded-full blur-[80px] animate-blob transform-gpu" />
+        <div className="absolute top-1/3 right-1/4 w-[35vw] h-[35vw] bg-pink-600/20 rounded-full blur-[80px] animate-blob animation-delay-2000 transform-gpu" />
+        <div className="absolute bottom-1/4 left-1/3 w-[45vw] h-[45vw] bg-blue-600/20 rounded-full blur-[80px] animate-blob animation-delay-4000 transform-gpu" />
+      </div>
+    </div>
   );
 }
+
