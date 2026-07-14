@@ -18,6 +18,7 @@ import { TermsAgreementModal } from './components/TermsAgreementModal';
 import { PromoAnimation } from './components/PromoAnimation';
 import { AccountSettings } from './components/settings/AccountSettings';
 import { PrivacySettings } from './components/settings/PrivacySettings';
+import { AppearanceSettings } from './components/settings/AppearanceSettings';
 
 type Role = 'user' | 'model';
 
@@ -374,7 +375,7 @@ export default function App() {
   }
 
   return (
-    <div className="relative h-[100dvh] w-full text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none">
+    <div className="relative h-[100dvh] w-full bg-black text-white font-sans selection:bg-purple-500/30 overflow-hidden flex flex-col select-none transition-colors duration-500">
       <CanvasBackground />
 
       <AnimatePresence>
@@ -383,7 +384,7 @@ export default function App() {
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] bg-[#18181b]/90 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-3 flex items-center gap-4 min-w-[300px] transform-gpu"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[300] bg-zinc-900/90 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-3 flex items-center gap-4 min-w-[300px] transform-gpu"
           >
             <div className="flex-1 flex flex-col">
               <span className="text-white font-medium text-sm">Install Aplikasi XhzellAI</span>
@@ -499,7 +500,7 @@ export default function App() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '-110%', opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-2 left-2 bottom-2 transform-gpu will-change-transform will-change-opacity md:top-4 md:left-4 md:bottom-4 w-72 md:w-80 z-50 bg-[#18181b]/70 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 flex flex-col shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+              className="absolute top-2 left-2 bottom-2 transform-gpu will-change-transform will-change-opacity md:top-4 md:left-4 md:bottom-4 w-72 md:w-80 z-50 bg-zinc-900/70 backdrop-blur-2xl border border-white/10 rounded-3xl p-5 flex flex-col shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
             >
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-2">
@@ -598,7 +599,7 @@ export default function App() {
           <Menu className="w-5 h-5 md:w-6 md:h-6 text-gray-300" />
         </motion.button>
         
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-[#18181b]/80 backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/10 space-x-1">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-zinc-900/80 backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/10 space-x-1">
           <div className="relative">
             <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowNotifications(!showNotifications)} className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 hover:bg-white/10 rounded-full transition-colors flex-shrink-0">
               <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
@@ -763,7 +764,7 @@ export default function App() {
 
       {/* Bottom Input Area */}
       <div className="w-full p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] md:p-6 md:pb-[max(2rem,env(safe-area-inset-bottom))] flex justify-center flex-shrink-0 relative z-10">
-        <div className="w-full max-w-3xl relative transform-gpu bg-[#18181b]/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-[#18181b] focus-within:border-white/20">
+        <div className="w-full max-w-3xl relative transform-gpu bg-zinc-900/90 backdrop-blur-md rounded-[32px] p-4 shadow-2xl border border-white/10 transition-all focus-within:bg-zinc-900 focus-within:border-white/20">
           <AnimatePresence>
             {showAttachmentMenu && (
               <motion.div
@@ -1083,6 +1084,8 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
             <AccountSettings key="akun" onBack={() => setActiveMenu(null)} onLogout={onLogout} />
           ) : activeMenu === 'privasi' ? (
             <PrivacySettings key="privasi" onBack={() => setActiveMenu(null)} />
+          ) : activeMenu === 'tampilan' ? (
+            <AppearanceSettings key="tampilan" onBack={() => setActiveMenu(null)} />
           ) : activeMenu === 'galeri' ? (
             <PromoAnimation key="galeri" onClose={() => setActiveMenu(null)} />
           ) : (
@@ -1108,12 +1111,12 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
                 {settingGroups.map((group, groupIdx) => (
                   <div key={groupIdx} className="flex flex-col">
                     <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-3 px-2">{group.title}</h3>
-                    <div className="bg-[#18181b] border border-white/5 rounded-3xl overflow-hidden flex flex-col">
+                    <div className="bg-zinc-900 border border-white/5 rounded-3xl overflow-hidden flex flex-col">
                       {group.items.map((setting, itemIdx) => (
                         <motion.div 
                           key={setting.id}
                           onClick={() => {
-                            if (setting.id === 'akun' || setting.id === 'galeri' || setting.id === 'privasi') {
+                            if (setting.id === 'akun' || setting.id === 'galeri' || setting.id === 'privasi' || setting.id === 'tampilan') {
                               setActiveMenu(setting.id);
                             }
                           }}
@@ -1158,11 +1161,11 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
 
 function AnimatedBackground() {
   return (
-    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden bg-[#000000]">
-      <div className="absolute inset-0 opacity-80 mix-blend-screen transform-gpu">
-        <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-purple-600/40 rounded-full blur-[80px] animate-blob transform-gpu" />
-        <div className="absolute top-1/3 right-1/4 w-[35vw] h-[35vw] bg-pink-600/40 rounded-full blur-[80px] animate-blob animation-delay-2000 transform-gpu" />
-        <div className="absolute bottom-1/4 left-1/3 w-[45vw] h-[45vw] bg-blue-600/40 rounded-full blur-[80px] animate-blob animation-delay-4000 transform-gpu" />
+    <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+      <div className="absolute inset-0 opacity-80 transform-gpu">
+        <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-purple-500/30 rounded-full blur-[80px] animate-blob transform-gpu" />
+        <div className="absolute top-1/3 right-1/4 w-[35vw] h-[35vw] bg-pink-500/30 rounded-full blur-[80px] animate-blob animation-delay-2000 transform-gpu" />
+        <div className="absolute bottom-1/4 left-1/3 w-[45vw] h-[45vw] bg-blue-500/30 rounded-full blur-[80px] animate-blob animation-delay-4000 transform-gpu" />
       </div>
     </div>
   );

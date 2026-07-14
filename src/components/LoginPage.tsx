@@ -144,7 +144,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                animate={{ opacity: 1, y: 0 }}
                exit={{ opacity: 0, y: -20 }}
                transition={{ duration: 0.3 }}
-               className="w-full max-w-md bg-[#18181b]/50 backdrop-blur-xl rounded-[32px] p-6 md:p-8 border border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
+               className="w-full max-w-md bg-zinc-900/50 backdrop-blur-xl rounded-[32px] p-6 md:p-8 border border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.6)]"
              >
                 <h1 className="text-2xl font-semibold mb-8 text-center text-gray-100">
                    {isLogin ? 'Masuk' : 'Daftar'}

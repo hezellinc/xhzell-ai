@@ -110,7 +110,7 @@ export const CanvasBackground: React.FC = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none -z-10 bg-[#0f172a]"
+      className="fixed inset-0 pointer-events-none -z-10 bg-transparent transition-colors duration-500"
     />
   );
 };

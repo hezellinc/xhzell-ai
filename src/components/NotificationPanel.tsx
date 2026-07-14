@@ -33,7 +33,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.2 }}
-      className="absolute top-16 right-4 md:right-8 w-80 z-50 bg-[#18181b]/70 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col max-h-[400px]"
+      className="absolute top-16 right-4 md:right-8 w-80 z-50 bg-zinc-900/70 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col max-h-[400px]"
     >
       <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
         <div className="flex items-center space-x-2">

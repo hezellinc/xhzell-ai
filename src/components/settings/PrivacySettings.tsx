@@ -43,7 +43,7 @@ export const PrivacySettings: React.FC<PrivacySettingsProps> = ({ onBack }) => {
 
       <div className="space-y-6">
         {/* Toggle Switches */}
-        <div className="bg-[#18181b] border border-white/5 rounded-2xl p-6">
+        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-6">
           <div className="flex items-center mb-6">
             <Shield className="w-6 h-6 text-pink-400 mr-3" />
             <h3 className="text-lg font-medium text-white">Kontrol Data Anda</h3>
@@ -114,7 +114,7 @@ export const PrivacySettings: React.FC<PrivacySettingsProps> = ({ onBack }) => {
         </div>
 
         {/* Delete History */}
-        <div className="bg-[#18181b] border border-white/5 rounded-2xl p-6">
+        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-6">
           <div className="flex items-center mb-6">
             <History className="w-6 h-6 text-orange-400 mr-3" />
             <h3 className="text-lg font-medium text-white">Riwayat Percakapan</h3>

@@ -168,14 +168,14 @@ export const PromoAnimation: React.FC<PromoAnimationProps> = ({ onClose }) => {
                       className="flex justify-start"
                     >
                       {scene === 4 ? (
-                        <div className="max-w-[85%] bg-[#18181b]/80 border border-white/10 backdrop-blur-md px-5 py-4 rounded-2xl rounded-tl-sm relative user-bubble-animated">
+                        <div className="max-w-[85%] bg-zinc-900/80 border border-white/10 backdrop-blur-md px-5 py-4 rounded-2xl rounded-tl-sm relative user-bubble-animated">
                            <AILoadingIndicator />
                         </div>
                       ) : (
                         <motion.div 
                            initial={{ opacity: 0, scale: 0.95 }}
                            animate={{ opacity: 1, scale: 1 }}
-                           className="max-w-[85%] bg-[#18181b]/90 border border-white/20 backdrop-blur-md px-5 py-4 rounded-2xl rounded-tl-sm relative overflow-hidden"
+                           className="max-w-[85%] bg-zinc-900/90 border border-white/20 backdrop-blur-md px-5 py-4 rounded-2xl rounded-tl-sm relative overflow-hidden"
                         >
                            <div className="absolute inset-0 bg-blue-500/10 animate-pulse pointer-events-none" />
                            <div className="flex flex-col gap-4 relative z-10">
@@ -209,7 +209,7 @@ export const PromoAnimation: React.FC<PromoAnimationProps> = ({ onClose }) => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
-                className="w-full bg-[#18181b]/90 backdrop-blur-md rounded-full p-2 pl-6 shadow-2xl border border-white/10 flex items-center gap-4"
+                className="w-full bg-zinc-900/90 backdrop-blur-md rounded-full p-2 pl-6 shadow-2xl border border-white/10 flex items-center gap-4"
               >
                 <div className="flex-1 text-white text-[15px] relative">
                   {scene === 3 ? (
