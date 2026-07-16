@@ -50,7 +50,8 @@ import { auth, db } from './firebase';
 
 const AI_MODELS = [
   { id: "gemini-3.5-flash", label: "xsp-3pro", provider: "gemini" },
-  { id: "openai", label: "xsp-coder", provider: "pollinations" }
+  { id: "openai", label: "xsp-coder", provider: "pollinations" },
+  { id: "gemini-3.1-flash-image", label: "Gemini 3.1 Flash Image", provider: "gemini" }
 ];
 export default function App() {
   const [input, setInput] = useState('');
@@ -317,7 +318,19 @@ export default function App() {
         throw new Error(data.error || 'Server sedang sibuk. Silakan coba beberapa saat lagi.');
       }
       
-      updateActiveChatMessages([...newMessages, { role: 'model', text: data.text }]);
+      const responseAttachments: Attachment[] = [];
+      if (data.images && data.images.length > 0) {
+        data.images.forEach((imgStr: string, idx: number) => {
+          responseAttachments.push({
+            id: `img-${Date.now()}-${idx}`,
+            type: 'image',
+            name: `Generated Image ${idx + 1}`,
+            url: imgStr
+          });
+        });
+      }
+
+      updateActiveChatMessages([...newMessages, { role: 'model', text: data.text, attachments: responseAttachments.length > 0 ? responseAttachments : undefined }]);
     } catch (error: any) {
       console.error("Chat Error:", error);
       const errorMessage = error.message || "Server sedang sibuk. Silakan coba beberapa saat lagi.";
@@ -734,14 +747,29 @@ export default function App() {
                       {msg.text && <div className="whitespace-pre-wrap font-sans text-[15px] md:text-base tracking-wide">{msg.text}</div>}
                     </div>
                   ) : (
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                       <div className="text-xs font-medium text-gray-400 bg-white/5 inline-flex items-center self-start px-2 py-1 rounded-md border border-white/10 mb-1">
                         <Sparkles size={12} className="mr-1.5 text-purple-400" />
                         {AI_MODELS.find(m => m.id === selectedModel)?.label || "AI"}
                       </div>
-                      <div className="markdown-body prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 prose-headings:font-semibold prose-a:text-purple-400 font-sans text-[15px] md:text-base tracking-wide">
-                        <Markdown>{msg.text}</Markdown>
-                      </div>
+                      
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <div className="flex flex-col gap-3 w-full">
+                          {msg.attachments.map(att => (
+                            att.type === 'image' && (
+                              <div key={att.id} className="relative rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+                                <img src={att.url} alt={att.name} className="w-full max-w-lg object-contain bg-black/20" loading="lazy" />
+                              </div>
+                            )
+                          ))}
+                        </div>
+                      )}
+                      
+                      {msg.text && (
+                        <div className="markdown-body prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 prose-headings:font-semibold prose-a:text-purple-400 font-sans text-[15px] md:text-base tracking-wide">
+                          <Markdown>{msg.text}</Markdown>
+                        </div>
+                      )}
                     </div>
                   )}
                   </div>
@@ -752,7 +780,7 @@ export default function App() {
             {isLoading && (
               <div className="flex w-full justify-start mt-2">
                 <div className="max-w-[85%] md:max-w-[75%] px-2 py-2">
-                  <AILoadingIndicator />
+                  <AILoadingIndicator isImageMode={selectedModel.includes('image')} />
                 </div>
               </div>
             )}
@@ -865,7 +893,7 @@ export default function App() {
               e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Tulis sesuatu..."
+            placeholder={selectedModel === 'gemini-3.1-flash-image' ? "Deskripsikan Gambar Anda" : "Tulis sesuatu..."}
             className="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none outline-none text-base min-h-[40px] max-h-[200px] overflow-y-auto px-2"
             rows={1}
             autoFocus

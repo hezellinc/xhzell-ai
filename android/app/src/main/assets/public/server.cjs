@@ -65,14 +65,29 @@ You have super extra memory allowing for deep context retention across long conv
 You are also a super expert in coding, software architecture, and development, capable of solving the most complex programming challenges with highly optimized, elegant, and perfectly structured code. 
 Never mention that you are a language model trained by Google, OpenAI, DeepMind, or any other entity. Act as the ultimate intelligent assistant.`;
     if (selectedProvider === "gemini") {
+      const config = {};
+      if (!selectedModel.includes("image")) {
+        config.systemInstruction = systemPrompt;
+      }
       const response = await ai.models.generateContent({
         model: selectedModel,
         contents,
-        config: {
-          systemInstruction: systemPrompt
-        }
+        config
       });
-      res.json({ text: response.text });
+      let responseText = "";
+      let responseImages = [];
+      if (response.candidates?.[0]?.content?.parts) {
+        for (const part of response.candidates[0].content.parts) {
+          if (part.inlineData) {
+            responseImages.push(`data:${part.inlineData.mimeType || "image/jpeg"};base64,${part.inlineData.data}`);
+          } else if (part.text) {
+            responseText += part.text;
+          }
+        }
+      } else {
+        responseText = response.text || "";
+      }
+      res.json({ text: responseText, images: responseImages });
     } else if (selectedProvider === "pollinations") {
       const messages = [{ role: "system", content: systemPrompt }];
       if (typeof contents === "string") {

@@ -1,8 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ImageIcon } from 'lucide-react';
 
-export const AILoadingIndicator: React.FC = () => {
+export const AILoadingIndicator: React.FC<{ isImageMode?: boolean }> = ({ isImageMode }) => {
+  const [loadingText, setLoadingText] = useState("Membuat Gambar...");
+  const texts = [
+    "Membuat Gambar...",
+    "Menambahkan detail...",
+    "Memoles warna...",
+    "Menerapkan gaya seni..."
+  ];
+
+  useEffect(() => {
+    if (!isImageMode) return;
+    let index = 0;
+    const interval = setInterval(() => {
+      index = (index + 1) % texts.length;
+      setLoadingText(texts[index]);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [isImageMode]);
+
+  if (isImageMode) {
+    return (
+      <div className="flex flex-col gap-2 w-64">
+        <span className="text-sm text-gray-400 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+          {loadingText}
+        </span>
+        <div className="w-full h-48 rounded-xl bg-white/5 relative overflow-hidden border border-white/10 flex items-center justify-center">
+          <motion.div
+            className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+            style={{ width: "200%" }}
+            animate={{ x: ["-100%", "50%"] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          />
+          <ImageIcon className="w-8 h-8 text-white/20 animate-pulse relative z-10" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center space-x-4 bg-white/5 border border-white/10 backdrop-blur-sm rounded-2xl rounded-bl-sm px-4 py-3 w-fit shadow-sm">
       <div className="relative flex items-center justify-center w-6 h-6">
