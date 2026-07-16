@@ -844,7 +844,11 @@ export default function App() {
                     transition={{ delay: i * 0.05, type: 'spring', stiffness: 400, damping: 15 }}
                     onClick={() => {
                         setShowMoreMenu(false);
-                        alert("Fitur " + item.label + " segera hadir!");
+                        if (item.type === 'create_image') {
+                          setSelectedModel('gemini-3.1-flash-image');
+                        } else {
+                          alert("Fitur " + item.label + " segera hadir!");
+                        }
                     }}
                     className="flex items-center space-x-1.5 bg-[#27272a]/95 hover:bg-[#3f3f46] border border-white/10 rounded-full px-3 py-1.5 shadow-xl backdrop-blur-md transition-colors"
                   >

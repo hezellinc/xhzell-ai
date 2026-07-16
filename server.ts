@@ -39,12 +39,26 @@ Never mention that you are a language model trained by Google, OpenAI, DeepMind,
 
     if (selectedProvider === "gemini") {
       const config: any = {};
-      if (!selectedModel.includes("image")) {
+      let finalContents = contents;
+      
+      if (selectedModel.includes("image")) {
+        // Image models usually do not support chat history, extract the last user message.
+        if (Array.isArray(contents)) {
+          const lastUserMsg = contents.filter(c => c.role === "user").pop();
+          if (lastUserMsg && lastUserMsg.parts && lastUserMsg.parts.length > 0) {
+            finalContents = lastUserMsg.parts[0].text;
+          }
+        }
+        config.imageConfig = {
+          aspectRatio: "1:1",
+          imageSize: "1K"
+        };
+      } else {
         config.systemInstruction = systemPrompt;
       }
       const response = await ai.models.generateContent({
         model: selectedModel,
-        contents: contents,
+        contents: finalContents,
         config: config
       });
       
