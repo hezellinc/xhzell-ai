@@ -51,7 +51,6 @@ import { auth, db } from './firebase';
 const AI_MODELS = [
   { id: "gemini-3.5-flash", label: "xsp-3pro", provider: "gemini" },
   { id: "openai", label: "xsp-coder", provider: "pollinations" },
-  { id: "gemini-3.1-flash-image", label: "Gemini 3.1 Flash Image", provider: "gemini" }
 ];
 export default function App() {
   const [input, setInput] = useState('');
@@ -110,6 +109,8 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState('1');
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [isImageMode, setIsImageMode] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>(() => {
@@ -277,6 +278,7 @@ export default function App() {
     const shouldGenerateTitle = activeChat.messages.length === 0;
     updateActiveChatMessages(newMessages, shouldGenerateTitle);
     setIsLoading(true);
+    setIsGeneratingImage(isImageMode);
 
     try {
       const contents = newMessages.map(m => {
@@ -306,11 +308,14 @@ export default function App() {
         };
       });
       const selectedModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
+      const actualModel = isImageMode ? "imagen-3.0-generate-001" : selectedModel;
+      const actualProvider = isImageMode ? "gemini" : selectedModelObj.provider;
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents, model: selectedModel, provider: selectedModelObj.provider }),
+        body: JSON.stringify({ contents, model: actualModel, provider: actualProvider }),
       });
+      setIsImageMode(false);
 
       const data = await res.json();
 
@@ -337,6 +342,7 @@ export default function App() {
       updateActiveChatMessages([...newMessages, { role: 'model', text: errorMessage }]);
     } finally {
       setIsLoading(false);
+      setIsGeneratingImage(false);
     }
   };
 
@@ -780,7 +786,7 @@ export default function App() {
             {isLoading && (
               <div className="flex w-full justify-start mt-2">
                 <div className="max-w-[85%] md:max-w-[75%] px-2 py-2">
-                  <AILoadingIndicator isImageMode={selectedModel.includes('image')} />
+                  <AILoadingIndicator isImageMode={isGeneratingImage} />
                 </div>
               </div>
             )}
@@ -845,7 +851,7 @@ export default function App() {
                     onClick={() => {
                         setShowMoreMenu(false);
                         if (item.type === 'create_image') {
-                          setSelectedModel('gemini-3.1-flash-image');
+                          setIsImageMode(true);
                         } else {
                           alert("Fitur " + item.label + " segera hadir!");
                         }
@@ -897,7 +903,7 @@ export default function App() {
               e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
             }}
             onKeyDown={handleKeyDown}
-            placeholder={selectedModel === 'gemini-3.1-flash-image' ? "Deskripsikan Gambar Anda" : "Tulis sesuatu..."}
+            placeholder={isImageMode ? "Deskripsikan Gambar Anda..." : "Tulis sesuatu..."}
             className="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none outline-none text-base min-h-[40px] max-h-[200px] overflow-y-auto px-2"
             rows={1}
             autoFocus
