@@ -686,7 +686,7 @@ export default function App() {
                     initial={{ x: "-100%" }}
                     animate={{ x: "100%" }}
                     transition={{ duration: 1.5, delay: 1.2, ease: "easeInOut" }}
-                    className="w-full h-full bg-gradient-to-r from-transparent via-white to-transparent drop-shadow-[0_0_8px_rgba(255,255,255,1)]"
+                    className="w-full h-full bg-gradient-to-r from-transparent via-white to-transparent drop-shadow-md"
                   />
                 </div>
               </motion.div>
