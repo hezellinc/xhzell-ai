@@ -44,13 +44,38 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       showNotification(`Selamat datang, ${user.displayName || user.email?.split('@')[0] || 'User'}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Google Login Error:", error);
+      if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+        alert("Gagal login dengan Google: " + (error.message || "Terjadi kesalahan"));
+      }
     }
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const getErrorMessage = (error: any) => {
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          return 'Email ini sudah terdaftar. Silakan login atau gunakan email lain.';
+        case 'auth/invalid-email':
+          return 'Format email tidak valid.';
+        case 'auth/weak-password':
+          return 'Password terlalu lemah (minimal 6 karakter).';
+        case 'auth/invalid-credential':
+          return 'Email atau password salah.';
+        case 'auth/user-not-found':
+          return 'Pengguna tidak ditemukan.';
+        case 'auth/wrong-password':
+          return 'Password salah.';
+        case 'auth/too-many-requests':
+          return 'Terlalu banyak percobaan. Silakan coba lagi nanti.';
+        default:
+          return 'Terjadi kesalahan: ' + (error.message || 'Gagal diproses');
+      }
+    };
+
     if (isLogin) {
       if (email && password) {
         try {
@@ -58,10 +83,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           showNotification('Berhasil login');
         } catch (error: any) {
           console.error("Login Error:", error);
-          alert(error.message || "Gagal login");
+          alert(getErrorMessage(error));
         }
       }
     } else {
+      if (password.length < 6) {
+         alert("Password terlalu lemah (minimal 6 karakter).");
+         return;
+      }
       if (password !== confirmPassword) {
          alert("Password tidak cocok");
          return;
@@ -77,7 +106,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           showNotification('Berhasil mendaftar');
         } catch (error: any) {
           console.error("Register Error:", error);
-          alert(error.message || "Gagal mendaftar");
+          alert(getErrorMessage(error));
         }
       }
     }
