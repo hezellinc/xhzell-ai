@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import Plasma from './Plasma';
+import LogoLoop from './Loop';
 import { Sparkles, ArrowRight, MessageSquare, Image as ImageIcon, Zap, Code, Shield, Activity, Cpu } from 'lucide-react';
 
 interface LandingPageProps {
@@ -13,7 +14,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay, className = "" }: 
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-100px" }}
     transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-    className={`bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md hover:bg-white/10 transition-colors group relative overflow-hidden ${className}`}
+    className={`bg-white/5 border border-white/10 rounded-[2rem] p-6 md:p-8 backdrop-blur-md hover:bg-white/10 transition-colors group relative overflow-hidden ${className}`}
   >
     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
     <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6 border border-white/5 group-hover:scale-110 transition-transform">
@@ -27,6 +28,15 @@ const FeatureCard = ({ icon: Icon, title, description, delay, className = "" }: 
 );
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+  const logos = [
+    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Code className="w-5 h-5 text-purple-400" /> React</div>, ariaLabel: 'React' },
+    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Zap className="w-5 h-5 text-yellow-400" /> Vite</div>, ariaLabel: 'Vite' },
+    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Sparkles className="w-5 h-5 text-blue-400" /> TailwindCSS</div>, ariaLabel: 'TailwindCSS' },
+    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Activity className="w-5 h-5 text-green-400" /> TypeScript</div>, ariaLabel: 'TypeScript' },
+    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Cpu className="w-5 h-5 text-orange-400" /> Gemini AI</div>, ariaLabel: 'Gemini' },
+    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Shield className="w-5 h-5 text-red-400" /> Firebase</div>, ariaLabel: 'Firebase' }
+  ];
+
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -57,21 +67,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </div>
 
       {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-2">
-          <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover border border-white/20" />
-          <span className="font-semibold text-lg tracking-tight">XhzellAI</span>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/5 backdrop-blur-md border-b border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
+          <div className="flex items-center gap-2">
+            <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover border border-white/20" />
+            <span className="font-semibold text-lg tracking-tight">XhzellAI</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
+            <a href="#features" className="hover:text-white transition-colors">Fitur</a>
+            <a href="#preview" className="hover:text-white transition-colors">Preview</a>
+          </nav>
+          <button 
+            onClick={onGetStarted}
+            className="bg-white text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-transform active:scale-95"
+          >
+            Masuk
+          </button>
         </div>
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
-          <a href="#features" className="hover:text-white transition-colors">Fitur</a>
-          <a href="#preview" className="hover:text-white transition-colors">Preview</a>
-        </nav>
-        <button 
-          onClick={onGetStarted}
-          className="bg-white text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-transform active:scale-95"
-        >
-          Masuk
-        </button>
       </header>
 
       {/* Hero Section */}
@@ -95,7 +107,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl md:text-7xl font-bold tracking-tight mb-6 max-w-4xl leading-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60"
+            className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 max-w-4xl leading-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60"
             style={{ textWrap: 'balance' }}
           >
             Asisten Cerdas Tanpa Batas Ruang & Waktu
@@ -115,7 +127,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
+            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-20"
           >
             <button 
               onClick={onGetStarted}
@@ -131,6 +143,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             >
               Pelajari Fitur
             </a>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 0.6 }}
+            className="w-full max-w-4xl mx-auto overflow-hidden relative"
+            style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}
+          >
+            <p className="text-sm text-white/40 mb-6 uppercase tracking-widest font-semibold">Ditenagai oleh teknologi modern</p>
+            <LogoLoop 
+              logos={logos}
+              speed={40}
+              direction="left"
+              gap={32}
+              logoHeight={30}
+              pauseOnHover={true}
+              scaleOnHover={false}
+            />
           </motion.div>
         </motion.div>
 
@@ -150,7 +181,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       {/* Stats Section */}
       <section className="relative z-20 border-y border-white/5 bg-black/40 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-white/5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 md:gap-y-0 gap-x-4 md:gap-8 divide-x-0 md:divide-x divide-white/5">
             {[
               { label: "Uptime", value: "99.9%" },
               { label: "Generasi Gambar", value: "< 2s" },
@@ -163,10 +194,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="text-center px-4"
+                className="text-center px-2 md:px-4"
               >
-                <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</div>
-                <div className="text-white/50 text-sm font-medium">{stat.label}</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 md:mb-2">{stat.value}</div>
+                <div className="text-white/50 text-xs sm:text-sm font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -185,7 +216,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <p className="text-white/60 text-lg max-w-2xl mx-auto">Dirancang untuk kecepatan, keindahan, dan produktivitas maksimal.</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           <FeatureCard 
             icon={MessageSquare} 
             title="Chat Interaktif & Pintar" 
@@ -216,6 +247,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             title="Aman & Terjamin" 
             description="Data Anda dilindungi oleh Firebase Authentication dan enkripsi modern pada setiap interaksi."
             delay={0.5}
+            className="md:col-span-2 lg:col-span-1"
           />
         </div>
         
@@ -229,7 +261,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           className="mt-24 relative group"
         >
            <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-[2.5rem] blur opacity-50 group-hover:opacity-100 transition duration-1000"></div>
-           <div className="relative bg-black/80 border border-white/10 rounded-[2rem] p-4 md:p-8 backdrop-blur-xl shadow-2xl">
+           <div className="relative bg-black/80 border border-white/10 rounded-3xl md:rounded-[2rem] p-3 md:p-8 backdrop-blur-xl shadow-2xl">
               <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                  <div className="h-12 border-b border-white/10 flex items-center px-4 gap-2 bg-white/5">
                     <div className="flex gap-1.5">
@@ -274,7 +306,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                                 <motion.div 
                                   initial={{ opacity: 1 }}
                                   animate={{ opacity: 0.5 }}
-                                  transition={{ repeat: Infinity, duration: 1.5, direction: "alternate" }}
+                                  transition={{ repeat: Infinity, duration: 1.5, repeatType: "reverse" }}
                                   className="absolute inset-0 bg-white/5"
                                 />
                                 <ImageIcon className="w-8 h-8 text-white/30" />
@@ -298,7 +330,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-b from-white/10 to-transparent border border-white/10 rounded-3xl p-12 backdrop-blur-sm"
+          className="bg-gradient-to-b from-white/10 to-transparent border border-white/10 rounded-3xl p-8 md:p-12 backdrop-blur-sm"
         >
           <h2 className="text-3xl md:text-5xl font-bold mb-6">Siap Memulai Perjalanan Anda?</h2>
           <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
