@@ -308,7 +308,7 @@ export default function App() {
         };
       });
       const selectedModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
-      const actualModel = isImageMode ? "imagen-3.0-generate-001" : selectedModel;
+      const actualModel = isImageMode ? "gemini-2.5-flash-image" : selectedModel;
       const actualProvider = isImageMode ? "gemini" : selectedModelObj.provider;
       const res = await fetch("/api/chat", {
         method: "POST",
