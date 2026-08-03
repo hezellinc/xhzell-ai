@@ -42,24 +42,26 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
           </div>
           
           <h1 className="text-2xl font-semibold text-white mb-2">XhzellAI</h1>
-          <p className="text-gray-400 text-sm mb-6">Versi 1.0.0</p>
+          <p className="text-gray-400 text-sm mb-6">Versi 2.5.0</p>
           
           <p className="text-gray-300 text-sm leading-relaxed mb-6">
-            XhzellAI adalah asisten kecerdasan buatan serbaguna yang didesain untuk menjadi pendamping Anda dalam meningkatkan produktivitas, menyelesaikan masalah, dan mengeksplorasi ide-ide kreatif dengan antarmuka yang bersih dan interaktif.
+            XhzellAI adalah asisten kecerdasan buatan komprehensif yang dirancang untuk meningkatkan produktivitas, mengoptimalkan penyelesaian masalah, dan mengakselerasi ide kreatif melalui antarmuka yang elegan dan interaktif. 
+            <br/><br/>
+            Dikembangkan oleh <strong>M Fariz Alfauzi</strong> (kelahiran 2008, Cianjur, Jawa Barat), seorang AI Software & Computer Engineering profesional, yang saat ini sedang menempuh pendidikan di SMK NURUL ISLAM AFFANDIYAH CIANJUR.
           </p>
           
           <div className="w-full p-4 bg-white/5 rounded-xl border border-white/10 text-xs text-gray-400 space-y-2 text-left">
             <div className="flex justify-between">
               <span>Pengembang</span>
-              <span className="text-gray-200">Xhzell</span>
+              <span className="text-gray-200">M Fariz Alfauzi</span>
             </div>
             <div className="flex justify-between">
               <span>Ditenagai Oleh</span>
-              <span className="text-gray-200">Xspace Models</span>
+              <span className="text-gray-200">Gemini Xspace</span>
             </div>
             <div className="flex justify-between">
               <span>Hak Cipta</span>
-              <span className="text-gray-200">© 2026 Xhzell. All rights reserved.</span>
+              <span className="text-gray-200">© 2026 Xee.Rizz. all rights reversed.</span>
             </div>
           </div>
         </div>
