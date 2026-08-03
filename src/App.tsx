@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
   ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon, ChevronRight,
-  Image as ImageIcon, FileText, Video, HelpCircle, Info, Film
+  Image as ImageIcon, FileText, Video, HelpCircle, Info, Film, ArrowLeft
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
@@ -434,24 +434,22 @@ export default function App() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {!isAuthenticated ? (
-          showLandingPage ? (
-            <LandingPage key="landing" onGetStarted={() => setShowLandingPage(false)} />
-          ) : (
-            <LoginPage key="login" onLoginSuccess={(name) => {
-              setUserName(name);
-              setIsAuthenticated(true);
-              localStorage.setItem('xhzell_auth', 'true');
-              localStorage.setItem('xhzell_user', name);
-              setNotifications([{
-                id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
-                title: `Halo, ${name}!`,
-                message: 'Selamat datang di XhzellAI. Senang melihat Anda di sini!',
-                isRead: false,
-                timestamp: new Date()
-              }]);
-            }} />
-          )
+        {showLandingPage ? (
+          <LandingPage key="landing" onGetStarted={() => setShowLandingPage(false)} />
+        ) : !isAuthenticated ? (
+          <LoginPage key="login" onBack={() => setShowLandingPage(true)} onLoginSuccess={(name) => {
+            setUserName(name);
+            setIsAuthenticated(true);
+            localStorage.setItem('xhzell_auth', 'true');
+            localStorage.setItem('xhzell_user', name);
+            setNotifications([{
+              id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
+              title: `Halo, ${name}!`,
+              message: 'Selamat datang di XhzellAI. Senang melihat Anda di sini!',
+              isRead: false,
+              timestamp: new Date()
+            }]);
+          }} />
         ) : !hasAgreedTerms ? (
           <TermsAgreementModal 
             key="terms" 
@@ -578,6 +576,18 @@ export default function App() {
               </div>
               
               <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
+                <button
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    setShowLandingPage(true);
+                  }}
+                  className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-white/10 text-gray-300 hover:text-white transition-colors text-sm"
+                >
+                  <div className="p-1.5 bg-blue-500/20 rounded-lg text-blue-400">
+                    <ArrowLeft className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Kembali ke Beranda</span>
+                </button>
                 <button
                   onClick={() => {
                     setIsSidebarOpen(false);

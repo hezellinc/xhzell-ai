@@ -1,6 +1,7 @@
+import Plasma from "./Plasma";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Lock, CheckCircle2, ShieldAlert, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, CheckCircle2, ShieldAlert, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { TermsOfService } from './TermsOfService';
@@ -8,9 +9,10 @@ import { PrivacyPolicy } from './PrivacyPolicy';
 
 interface LoginPageProps {
   onLoginSuccess: (username: string) => void;
+  onBack?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onBack }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -129,8 +131,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
        initial={{ opacity: 0 }}
        animate={{ opacity: 1 }}
        exit={{ opacity: 0, transition: { duration: 0.5 } }}
-       className="absolute inset-0 z-50 flex flex-col justify-between overflow-y-auto no-scrollbar"
+       className="absolute inset-0 z-50 flex flex-col justify-between overflow-y-auto overflow-x-hidden no-scrollbar bg-black text-white"
      >
+        {/* Plasma Background */}
+        <div className="fixed inset-0 z-[-1]">
+          <Plasma 
+            color="#B497CF"
+            speed={1}
+            direction="forward"
+            scale={1}
+            opacity={1}
+            mouseInteractive={false}
+            renderScale={0.25}
+            maxDpr={1}
+            targetFps={60}
+            iterations={40}
+          />
+          {/* Subtle overlay gradient to blend content */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-transparent via-black/60 to-black z-10" />
+        </div>
         {/* Notification Popup - iPhone Style */}
         <AnimatePresence>
           {notification.show && (
@@ -148,8 +167,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         </AnimatePresence>
 
         {/* Header */}
-        <header className="flex items-center justify-between p-6 w-full flex-shrink-0">
-           <div className="flex items-center gap-2">
+        <header className="flex items-center justify-between p-6 w-full flex-shrink-0 relative">
+           {onBack && (
+             <motion.button 
+               whileTap={{ scale: 0.95 }}
+               onClick={onBack}
+               className="absolute left-6 top-6 p-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors flex items-center justify-center text-gray-300 hover:text-white"
+             >
+               <ArrowLeft className="w-5 h-5" />
+             </motion.button>
+           )}
+           <div className={`flex items-center gap-2 ${onBack ? 'ml-14' : ''}`}>
               <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover" />
               <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
                 XhzellAI
