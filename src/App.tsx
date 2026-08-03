@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CanvasBackground } from './components/CanvasBackground';
 import { AILoadingIndicator } from './components/AILoadingIndicator';
 import { HeaderSpotlight } from './components/HeaderSpotlight';
+import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { NotificationPanel, NotificationItem } from './components/NotificationPanel';
 import { ProfilePage } from './components/ProfilePage';
@@ -61,6 +62,7 @@ export default function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(true);
   const [userName, setUserName] = useState('');
   const [userPhotoURL, setUserPhotoURL] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -433,19 +435,23 @@ export default function App() {
 
       <AnimatePresence mode="wait">
         {!isAuthenticated ? (
-          <LoginPage key="login" onLoginSuccess={(name) => {
-            setUserName(name);
-            setIsAuthenticated(true);
-            localStorage.setItem('xhzell_auth', 'true');
-            localStorage.setItem('xhzell_user', name);
-            setNotifications([{
-              id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
-              title: `Halo, ${name}!`,
-              message: 'Selamat datang di XhzellAI. Senang melihat Anda di sini!',
-              isRead: false,
-              timestamp: new Date()
-            }]);
-          }} />
+          showLandingPage ? (
+            <LandingPage key="landing" onGetStarted={() => setShowLandingPage(false)} />
+          ) : (
+            <LoginPage key="login" onLoginSuccess={(name) => {
+              setUserName(name);
+              setIsAuthenticated(true);
+              localStorage.setItem('xhzell_auth', 'true');
+              localStorage.setItem('xhzell_user', name);
+              setNotifications([{
+                id: Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9),
+                title: `Halo, ${name}!`,
+                message: 'Selamat datang di XhzellAI. Senang melihat Anda di sini!',
+                isRead: false,
+                timestamp: new Date()
+              }]);
+            }} />
+          )
         ) : !hasAgreedTerms ? (
           <TermsAgreementModal 
             key="terms" 
