@@ -29,12 +29,12 @@ const FeatureCard = ({ icon: Icon, title, description, delay, className = "" }: 
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const logos = [
-    { src: '/React-logo.png', alt: 'React' },
-    { src: '/Vite-logo.png', alt: 'Vite' },
-    { src: '/Tailwind-logo.png', alt: 'TailwindCSS' },
-    { src: '/TypeScript-logo.png', alt: 'TypeScript' },
-    { src: '/Gemini-logo.png', alt: 'Gemini AI' },
-    { src: '/Firabase-logo.png', alt: 'Firebase' }
+    { src: '/react-logo.jpg', alt: 'React' },
+    { src: '/vite-logo.jpg', alt: 'Vite' },
+    { src: '/tailwind-logo.jpg', alt: 'TailwindCSS' },
+    { src: '/typescript-logo.jpg', alt: 'TypeScript' },
+    { src: '/gemini-logo.jpg', alt: 'Gemini AI' },
+    { src: '/firabase-logo.jpg', alt: 'Firebase' }
   ];
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,7 +70,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-2">
-            <img src="/Xhzell-logo-transparant.png" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-contain" />
+            <img src="/Xhzell-logo-transparant.jpg" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-contain" />
             <span className="font-semibold text-lg tracking-tight">XhzellAI</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
@@ -100,7 +100,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           >
             <span className="bg-purple-500 text-white px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold">Baru</span>
             <span className="text-white/90">XhzellAI v2.5.0 Dirilis</span>
-            <img src="/Xhzell-logo-transparant.png" className="w-4 h-4 object-contain" alt="" />
+            <img src="/Xhzell-logo-transparant.jpg" className="w-4 h-4 object-contain" alt="" />
           </motion.div>
 
           <motion.h1 
@@ -304,7 +304,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                     >
                        <div className="flex gap-3 max-w-[90%] md:max-w-[80%]">
                           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-white/20">
-                             <img src="/Xhzell-logo-transparant.png" alt="AI" className="w-full h-full object-contain p-1 bg-white/5" />
+                             <img src="/Xhzell-logo-transparant.jpg" alt="AI" className="w-full h-full object-contain p-1 bg-white/5" />
                           </div>
                           <div className="bg-transparent text-white/90 px-2 py-1 text-sm leading-relaxed space-y-4">
                              <p>Tentu, berikut adalah generasi gambar aurora borealis yang Anda minta:</p>

@@ -38,7 +38,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onClose }) => {
         
         <div className="p-8 text-center flex flex-col items-center">
           <div className="w-20 h-20 rounded-2xl shadow-lg flex items-center justify-center mb-6 overflow-hidden border border-white/20">
-            <img src="/Xhzell-logo-transparant.png" alt="XhzellAI Logo" className="w-full h-full object-contain" />
+            <img src="/Xhzell-logo-transparant.jpg" alt="XhzellAI Logo" className="w-full h-full object-contain" />
           </div>
           
           <h1 className="text-2xl font-semibold text-white mb-2">XhzellAI</h1>
