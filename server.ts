@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
+import Groq from "groq-sdk";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -19,6 +20,8 @@ const pollinations = new OpenAI({
   apiKey: "dummy-key",
   baseURL: "https://text.pollinations.ai/openai",
 });
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "dummy-key" });
 
 export const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -144,6 +147,28 @@ If you use web search to find information, always include the source links in a 
       });
       res.json({ text: response.choices[0].message.content });
       
+    } else if (selectedProvider === "groq") {
+      const messages = [{ role: "system", content: finalSystemPrompt }];
+      
+      if (typeof contents === "string") {
+        messages.push({ role: "user", content: contents });
+      } else if (Array.isArray(contents)) {
+        for (const msg of contents) {
+          if (msg.role === "user" || msg.role === "model") {
+             const role = msg.role === "model" ? "assistant" : "user";
+             const content = Array.isArray(msg.parts) ? msg.parts.map((p: any) => p.text).join("\n") : msg.parts?.text || String(msg);
+             messages.push({ role, content });
+          }
+        }
+      }
+
+      const chatCompletion = await groq.chat.completions.create({
+        messages: messages as any,
+        model: selectedModel,
+      });
+
+      res.json({ text: chatCompletion.choices[0].message.content });
+          
     } else {
       res.status(400).json({ error: "Invalid provider selected" });
     }
