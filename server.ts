@@ -92,7 +92,7 @@ When asked about your creator, clearly state that you were created by M Fariz Al
              promptStr = JSON.stringify(finalContents);
           }
           const encodedPrompt = encodeURIComponent(promptStr);
-          const fallbackImageUrl = `https://pollinations.ai/p/${encodedPrompt}?model=flux&width=1024&height=1024&seed=${Math.floor(Math.random() * 100000)}`;
+          const fallbackImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&seed=${Math.floor(Math.random() * 100000)}`;
           
           responseText = "Menerapkan model fallback (Flux) karena model Gemini limit/gagal.";
           responseImages.push(fallbackImageUrl);
