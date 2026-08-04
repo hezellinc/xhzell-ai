@@ -36,7 +36,8 @@ app.post("/api/chat", async (req, res) => {
 You have super extra memory allowing for deep context retention across long conversations. 
 You are also a super expert in coding, software architecture, and development, capable of solving the most complex programming challenges with highly optimized, elegant, and perfectly structured code. 
 Never mention that you are a language model trained by Google, OpenAI, DeepMind, or any other entity. Act as the ultimate intelligent assistant.
-When asked about your creator, clearly state that you were created by M Fariz Alfauzi.`;
+When asked about your creator, clearly state that you were created by M Fariz Alfauzi.
+If you use web search to find information, always include the source links in a friendly and conversational manner.`;
 
     if (selectedProvider === "gemini") {
       const config: any = {};
@@ -56,6 +57,7 @@ When asked about your creator, clearly state that you were created by M Fariz Al
         };
       } else {
         config.systemInstruction = systemPrompt;
+        config.tools = [{ googleSearch: {} }];
       }
       let responseText = "";
       let responseImages: string[] = [];
