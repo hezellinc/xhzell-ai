@@ -29,12 +29,12 @@ const FeatureCard = ({ icon: Icon, title, description, delay, className = "" }: 
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const logos = [
-    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Code className="w-5 h-5 text-purple-400" /> React</div>, ariaLabel: 'React' },
-    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Zap className="w-5 h-5 text-yellow-400" /> Vite</div>, ariaLabel: 'Vite' },
-    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Sparkles className="w-5 h-5 text-blue-400" /> TailwindCSS</div>, ariaLabel: 'TailwindCSS' },
-    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Activity className="w-5 h-5 text-green-400" /> TypeScript</div>, ariaLabel: 'TypeScript' },
-    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Cpu className="w-5 h-5 text-orange-400" /> Gemini AI</div>, ariaLabel: 'Gemini' },
-    { node: <div className="flex items-center gap-2 text-white/60 text-lg font-medium"><Shield className="w-5 h-5 text-red-400" /> Firebase</div>, ariaLabel: 'Firebase' }
+    { src: '/React-logo.png', alt: 'React' },
+    { src: '/Vite-logo.png', alt: 'Vite' },
+    { src: '/Tailwind-logo.png', alt: 'TailwindCSS' },
+    { src: '/TypeScript-logo.png', alt: 'TypeScript' },
+    { src: '/Gemini-logo.png', alt: 'Gemini AI' },
+    { src: '/Firabase-logo.png', alt: 'Firebase' }
   ];
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,7 +47,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-screen overflow-y-auto overflow-x-hidden bg-black text-white font-sans selection:bg-purple-500/30 scroll-smooth">
+    <div ref={containerRef} className="relative w-full min-h-screen overflow-x-hidden bg-black text-white font-sans selection:bg-purple-500/30 scroll-smooth">
       {/* Background - Fixed so it covers the whole scrolling area */}
       <div className="fixed inset-0 z-0">
         <Plasma 
@@ -60,17 +60,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           renderScale={0.25}
           maxDpr={1}
           targetFps={60}
-          iterations={40}
+          iterations={30}
         />
         {/* Subtle overlay gradient to blend content */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-transparent via-black/60 to-black z-10" />
       </div>
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/5 backdrop-blur-md border-b border-white/5">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
           <div className="flex items-center gap-2">
-            <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover border border-white/20" />
+            <img src="/Xhzell-logo-transparant.png" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-contain" />
             <span className="font-semibold text-lg tracking-tight">XhzellAI</span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
@@ -87,10 +87,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </header>
 
       {/* Hero Section */}
-      <main className="relative z-20 flex flex-col items-center justify-center min-h-screen px-4 text-center pt-20">
+      <main className="relative z-20 flex flex-col items-center justify-center min-h-[90vh] px-4 sm:px-6 text-center pt-28 pb-16">
         <motion.div 
           style={{ y: heroY, opacity: heroOpacity }}
-          className="flex flex-col items-center"
+          className="flex flex-col items-center w-full max-w-full"
         >
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
@@ -100,7 +100,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           >
             <span className="bg-purple-500 text-white px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold">Baru</span>
             <span className="text-white/90">XhzellAI v2.5.0 Dirilis</span>
-            <Sparkles className="w-3 h-3 text-purple-400" />
+            <img src="/Xhzell-logo-transparant.png" className="w-4 h-4 object-contain" alt="" />
           </motion.div>
 
           <motion.h1 
@@ -127,11 +127,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-20"
+            className="flex flex-col sm:flex-row items-center gap-4 w-auto mb-12"
           >
             <button 
               onClick={onGetStarted}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black px-8 py-3.5 rounded-2xl font-semibold hover:bg-white/90 transition-all active:scale-95 group shadow-[0_0_40px_rgba(255,255,255,0.15)]"
+              className="w-auto flex items-center justify-center gap-2 bg-white text-black px-6 py-3 sm:px-8 sm:py-3.5 rounded-2xl font-semibold hover:bg-white/90 transition-all active:scale-95 group shadow-[0_0_40px_rgba(255,255,255,0.15)]"
             >
               Mulai Sekarang
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -139,7 +139,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             
             <a 
               href="#features"
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white px-8 py-3.5 rounded-2xl font-semibold hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md"
+              className="w-auto flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white px-6 py-3 sm:px-8 sm:py-3.5 rounded-2xl font-semibold hover:bg-white/10 transition-all active:scale-95 backdrop-blur-md"
             >
               Pelajari Fitur
             </a>
@@ -165,16 +165,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           </motion.div>
         </motion.div>
 
-        {/* Decorative Floating Elements */}
-        <motion.div
-          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-10 md:left-32 top-1/4 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl z-0"
+        {/* Decorative Floating Elements (Made static for better performance) */}
+        <div
+          className="absolute left-4 md:left-32 top-1/4 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl z-0"
         />
-        <motion.div
-          animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-10 md:right-32 top-1/3 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl z-0"
+        <div
+          className="absolute right-4 md:right-32 top-1/3 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl z-0"
         />
       </main>
 
@@ -205,7 +201,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </section>
 
       {/* Feature Bento Grid */}
-      <section id="features" className="relative z-20 max-w-7xl mx-auto px-6 py-24 min-h-screen flex flex-col justify-center">
+      <section id="features" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 flex flex-col justify-center">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -222,7 +218,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             title="Chat Interaktif & Pintar" 
             description="Dilengkapi model AI mutakhir (Xspace Models) untuk merespons semua pertanyaan Anda dengan cepat, akurat, dan memiliki memori kontekstual super."
             delay={0.1}
-            className="md:col-span-2"
           />
           <FeatureCard 
             icon={ImageIcon} 
@@ -247,7 +242,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             title="Aman & Terjamin" 
             description="Data Anda dilindungi oleh Firebase Authentication dan enkripsi modern pada setiap interaksi."
             delay={0.5}
-            className="md:col-span-2 lg:col-span-1"
+          />
+          <FeatureCard 
+            icon={Cpu} 
+            title="Kinerja Super Cepat" 
+            description="Ditenagai oleh infrastruktur komputasi tinggi yang menjamin kecepatan dan keandalan maksimal setiap saat."
+            delay={0.6}
+          />
+          <FeatureCard 
+            icon={Sparkles} 
+            title="Update & Inovasi Berkelanjutan" 
+            description="Kami terus menyempurnakan asisten cerdas ini. Pembaruan fitur reguler dan perbaikan algoritma dikerjakan setiap minggu untuk memastikan Anda selalu mendapatkan pengalaman masa depan."
+            delay={0.7}
+            className="md:col-span-2 lg:col-span-3"
           />
         </div>
         
@@ -258,7 +265,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mt-24 relative group"
+          className="mt-16 relative group"
         >
            <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-[2.5rem] blur opacity-50 group-hover:opacity-100 transition duration-1000"></div>
            <div className="relative bg-black/80 border border-white/10 rounded-3xl md:rounded-[2rem] p-3 md:p-8 backdrop-blur-xl shadow-2xl">
@@ -274,7 +281,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                       XhzellAI Terminal Preview
                     </div>
                  </div>
-                 <div className="p-6 md:p-8 space-y-6">
+                 <div className="p-4 md:p-8 space-y-4 md:space-y-6">
                     {/* User message */}
                     <motion.div 
                       initial={{ opacity: 0, x: 20 }}
@@ -283,7 +290,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                       transition={{ delay: 0.3 }}
                       className="flex justify-end"
                     >
-                       <div className="bg-white/10 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%] text-sm shadow-sm border border-white/5">
+                       <div className="bg-white/10 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-[90%] md:max-w-[80%] text-sm shadow-sm border border-white/5">
                           Tolong buatkan visualisasi aurora borealis di atas pegunungan salju
                        </div>
                     </motion.div>
@@ -297,7 +304,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                     >
                        <div className="flex gap-3 max-w-[90%] md:max-w-[80%]">
                           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-white/20">
-                             <img src="/logo-app.jpg" alt="AI" className="w-full h-full object-cover" />
+                             <img src="/Xhzell-logo-transparant.png" alt="AI" className="w-full h-full object-contain p-1 bg-white/5" />
                           </div>
                           <div className="bg-transparent text-white/90 px-2 py-1 text-sm leading-relaxed space-y-4">
                              <p>Tentu, berikut adalah generasi gambar aurora borealis yang Anda minta:</p>
@@ -325,7 +332,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-20 max-w-4xl mx-auto px-6 py-24 text-center">
+      <section className="relative z-20 max-w-4xl mx-auto px-6 py-16 md:py-20 text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}

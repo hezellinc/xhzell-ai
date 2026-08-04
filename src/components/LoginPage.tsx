@@ -178,7 +178,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onBack }) 
              </motion.button>
            )}
            <div className={`flex items-center gap-2 ${onBack ? 'ml-14' : ''}`}>
-              <img src="/logo-app.jpg" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-cover" />
+              <img src="/Xhzell-logo-transparant.png" alt="XhzellAI Logo" className="w-8 h-8 rounded-full object-contain" />
               <h2 className="text-2xl font-serif italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
                 XhzellAI
               </h2>

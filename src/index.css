@@ -91,6 +91,7 @@ html, body {
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  overflow-x: hidden;
 }
 
 @keyframes shimmer-text {
