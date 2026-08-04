@@ -51,8 +51,7 @@ import { auth, db } from './firebase';
 
 const AI_MODELS = [
   { id: "gemini-3.5-flash", label: "xsp-3pro", provider: "gemini" },
-  { id: "openai/gpt-oss-20b", label: "xsp-grok", provider: "groq" },
-  { id: "openai-large", label: "xsp-coder", provider: "pollinations" },
+  { id: "llama-3.3-70b-specdec", label: "xsp-grok", provider: "groq" },
 ];
 export default function App() {
   const [input, setInput] = useState('');

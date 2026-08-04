@@ -168,7 +168,7 @@ If you use web search to find information, always include the source links in a 
       });
 
       res.json({ text: chatCompletion.choices[0].message.content });
-          
+      
     } else {
       res.status(400).json({ error: "Invalid provider selected" });
     }
