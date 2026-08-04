@@ -57,25 +57,48 @@ When asked about your creator, clearly state that you were created by M Fariz Al
       } else {
         config.systemInstruction = systemPrompt;
       }
-      const response = await ai.models.generateContent({
-        model: selectedModel,
-        contents: finalContents,
-        config: config
-      });
-      
       let responseText = "";
       let responseImages: string[] = [];
 
-      if (response.candidates?.[0]?.content?.parts) {
-        for (const part of response.candidates[0].content.parts) {
-          if (part.inlineData) {
-            responseImages.push(`data:${part.inlineData.mimeType || 'image/jpeg'};base64,${part.inlineData.data}`);
-          } else if (part.text) {
-            responseText += part.text;
+      try {
+        const response = await ai.models.generateContent({
+          model: selectedModel,
+          contents: finalContents,
+          config: config
+        });
+        
+        if (response.candidates?.[0]?.content?.parts) {
+          for (const part of response.candidates[0].content.parts) {
+            if (part.inlineData) {
+              responseImages.push(`data:${part.inlineData.mimeType || 'image/jpeg'};base64,${part.inlineData.data}`);
+            } else if (part.text) {
+              responseText += part.text;
+            }
           }
+        } else {
+          responseText = response.text || "";
         }
-      } else {
-        responseText = response.text || "";
+      } catch (geminiError: any) {
+        if (selectedModel.includes("image")) {
+          console.warn("Gemini limit or error! Mengalihkan ke Pollinations.ai...", geminiError.message);
+          let promptStr = "";
+          if (typeof finalContents === "string") {
+            promptStr = finalContents;
+          } else if (Array.isArray(finalContents)) {
+            promptStr = finalContents.map((c: any) => typeof c === 'string' ? c : (c.text || JSON.stringify(c))).join(" ");
+          } else if (finalContents && (finalContents as any).text) {
+             promptStr = (finalContents as any).text;
+          } else {
+             promptStr = JSON.stringify(finalContents);
+          }
+          const encodedPrompt = encodeURIComponent(promptStr);
+          const fallbackImageUrl = `https://pollinations.ai/p/${encodedPrompt}?model=flux&width=1024&height=1024&seed=${Math.floor(Math.random() * 100000)}`;
+          
+          responseText = "Menerapkan model fallback (Flux) karena model Gemini limit/gagal.";
+          responseImages.push(fallbackImageUrl);
+        } else {
+          throw geminiError;
+        }
       }
 
       res.json({ text: responseText, images: responseImages });
