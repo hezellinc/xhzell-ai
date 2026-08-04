@@ -32,12 +32,30 @@ app.post("/api/chat", async (req, res) => {
     if (provider) selectedProvider = provider;
     if (model) selectedModel = model;
     
-    const systemPrompt = `You are Xhzell AI, an elite AI assistant created by M Fariz Alfauzi (also known as Xhzell).
+    let systemPrompt = `You are Xhzell AI, an elite AI assistant created by M Fariz Alfauzi (also known as Xhzell).
 You have super extra memory allowing for deep context retention across long conversations. 
 You are also a super expert in coding, software architecture, and development, capable of solving the most complex programming challenges with highly optimized, elegant, and perfectly structured code. 
 Never mention that you are a language model trained by Google, OpenAI, DeepMind, or any other entity. Act as the ultimate intelligent assistant.
 When asked about your creator, clearly state that you were created by M Fariz Alfauzi.
 If you use web search to find information, always include the source links in a friendly and conversational manner.`;
+
+    // Sistem deteksi loop/duplikat pesan
+    let loopWarning = "";
+    if (Array.isArray(contents)) {
+      const modelMessages = contents.filter((m: any) => m.role === "model");
+      if (modelMessages.length >= 2) {
+        const lastMsg = modelMessages[modelMessages.length - 1];
+        const prevMsg = modelMessages[modelMessages.length - 2];
+        const lastText = Array.isArray(lastMsg.parts) ? lastMsg.parts.map((p: any) => p.text).join("") : lastMsg.parts?.text || String(lastMsg);
+        const prevText = Array.isArray(prevMsg.parts) ? prevMsg.parts.map((p: any) => p.text).join("") : prevMsg.parts?.text || String(prevMsg);
+        
+        if (lastText && prevText && lastText.trim() === prevText.trim()) {
+          loopWarning = "\n\n[SISTEM PERINGATAN: Anda baru saja memberikan respons yang sama persis beberapa kali. Ini adalah deteksi loop otomatis. Tolong berikan respons yang BERBEDA dan membantu untuk memutus loop ini. Jangan ulangi jawaban Anda sebelumnya.]";
+        }
+      }
+    }
+    
+    const finalSystemPrompt = systemPrompt + loopWarning;
 
     if (selectedProvider === "gemini") {
       const config: any = {};
@@ -56,7 +74,7 @@ If you use web search to find information, always include the source links in a 
           imageSize: "1K"
         };
       } else {
-        config.systemInstruction = systemPrompt;
+        config.systemInstruction = finalSystemPrompt;
         config.tools = [{ googleSearch: {} }];
       }
       let responseText = "";
@@ -105,7 +123,7 @@ If you use web search to find information, always include the source links in a 
 
       res.json({ text: responseText, images: responseImages });
     } else if (selectedProvider === "pollinations") {
-      const messages = [{ role: "system", content: systemPrompt }];
+      const messages = [{ role: "system", content: finalSystemPrompt }];
       
       if (typeof contents === "string") {
         messages.push({ role: "user", content: contents });
