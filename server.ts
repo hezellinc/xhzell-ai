@@ -64,22 +64,9 @@ If you use web search to find information, always include the source links in a 
       const config: any = {};
       let finalContents = contents;
       
-      if (selectedModel.includes("image")) {
-        // Image models usually do not support chat history, extract the last user message.
-        if (Array.isArray(contents)) {
-          const lastUserMsg = contents.filter(c => c.role === "user").pop();
-          if (lastUserMsg && lastUserMsg.parts && lastUserMsg.parts.length > 0) {
-            finalContents = lastUserMsg.parts[0].text;
-          }
-        }
-        config.imageConfig = {
-          aspectRatio: "1:1",
-          imageSize: "1K"
-        };
-      } else {
-        config.systemInstruction = finalSystemPrompt;
-        config.tools = [{ googleSearch: {} }];
-      }
+      config.systemInstruction = finalSystemPrompt;
+      config.tools = [{ googleSearch: {} }];
+
       let responseText = "";
       let responseImages: string[] = [];
 
@@ -102,29 +89,64 @@ If you use web search to find information, always include the source links in a 
           responseText = response.text || "";
         }
       } catch (geminiError: any) {
-        if (selectedModel.includes("image")) {
-          console.warn("Gemini limit or error! Mengalihkan ke Pollinations.ai...", geminiError.message);
-          let promptStr = "";
-          if (typeof finalContents === "string") {
-            promptStr = finalContents;
-          } else if (Array.isArray(finalContents)) {
-            promptStr = finalContents.map((c: any) => typeof c === 'string' ? c : (c.text || JSON.stringify(c))).join(" ");
-          } else if (finalContents && (finalContents as any).text) {
-             promptStr = (finalContents as any).text;
-          } else {
-             promptStr = JSON.stringify(finalContents);
-          }
-          const encodedPrompt = encodeURIComponent(promptStr);
-          const fallbackImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&seed=${Math.floor(Math.random() * 100000)}`;
-          
-          responseText = "Menerapkan model fallback (Flux) karena model Gemini limit/gagal.";
-          responseImages.push(fallbackImageUrl);
-        } else {
-          throw geminiError;
-        }
+        throw geminiError;
       }
 
       res.json({ text: responseText, images: responseImages });
+    } else if (selectedProvider === "cloudflare") {
+      let promptStr = "";
+      if (typeof contents === "string") {
+        promptStr = contents;
+      } else if (Array.isArray(contents)) {
+        const lastUserMsg = contents.filter(c => c.role === "user").pop();
+        if (lastUserMsg && lastUserMsg.parts && lastUserMsg.parts.length > 0) {
+          promptStr = Array.isArray(lastUserMsg.parts) ? lastUserMsg.parts.map((p: any) => p.text).join(" ") : lastUserMsg.parts.text || String(lastUserMsg);
+        } else {
+          promptStr = contents.map((c: any) => typeof c === 'string' ? c : (c.text || JSON.stringify(c))).join(" ");
+        }
+      } else if (contents && (contents as any).text) {
+         promptStr = (contents as any).text;
+      } else {
+         promptStr = JSON.stringify(contents);
+      }
+      
+      if (!process.env.CLOUDFLARE_ACCOUNT_ID || !process.env.CLOUDFLARE_API_TOKEN) {
+         throw new Error("Kredensial Cloudflare (CLOUDFLARE_ACCOUNT_ID dan CLOUDFLARE_API_TOKEN) belum diatur.");
+      }
+
+      const cfResponse = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ prompt: promptStr })
+        }
+      );
+
+      if (!cfResponse.ok) {
+        throw new Error(`Cloudflare AI API Error: ${cfResponse.statusText}`);
+      }
+
+      const contentType = cfResponse.headers.get("content-type") || "";
+      let fallbackImageUrl = "";
+      if (contentType.includes("application/json")) {
+        const data = await cfResponse.json();
+        if (data.result && data.result.image) {
+          fallbackImageUrl = `data:image/jpeg;base64,${data.result.image}`;
+        } else {
+          throw new Error("Invalid JSON response from Cloudflare AI");
+        }
+      } else {
+        const arrayBuffer = await cfResponse.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        fallbackImageUrl = `data:image/jpeg;base64,${buffer.toString('base64')}`;
+      }
+      
+      res.json({ text: "Berikut gambar yang Anda minta:", images: [fallbackImageUrl] });
+      
     } else if (selectedProvider === "pollinations") {
       const messages = [{ role: "system", content: finalSystemPrompt }];
       

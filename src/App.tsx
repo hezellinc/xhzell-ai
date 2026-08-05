@@ -50,8 +50,9 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini" },
-  { id: "openai/gpt-oss-20b", label: "xsp-grok", provider: "groq" },
+  { id: "gemini-3.5-flash", label: "xsp-3pro", provider: "gemini" },
+  { id: "llama-3.3-70b-specdec", label: "xsp-grok", provider: "groq" },
+  { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true },
 ];
 export default function App() {
   const [input, setInput] = useState('');
@@ -111,7 +112,6 @@ export default function App() {
   const [activeChatId, setActiveChatId] = useState('1');
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const [isImageMode, setIsImageMode] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   
@@ -280,7 +280,7 @@ export default function App() {
     const shouldGenerateTitle = activeChat.messages.length === 0;
     updateActiveChatMessages(newMessages, shouldGenerateTitle);
     setIsLoading(true);
-    setIsGeneratingImage(isImageMode);
+    setIsGeneratingImage((AI_MODELS.find(m => m.id === selectedModel) as any)?.isImage || false);
 
     try {
       const contents = newMessages.map(m => {
@@ -310,14 +310,14 @@ export default function App() {
         };
       });
       const selectedModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
-      const actualModel = isImageMode ? "gemini-2.5-flash-image" : selectedModel;
-      const actualProvider = isImageMode ? "gemini" : selectedModelObj.provider;
+      const imageRequested = (selectedModelObj as any).isImage;
+      const actualModel = imageRequested ? "flux-1-schnell" : selectedModel;
+      const actualProvider = imageRequested ? "cloudflare" : selectedModelObj.provider;
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents, model: actualModel, provider: actualProvider }),
       });
-      setIsImageMode(false);
 
       const data = await res.json();
 
@@ -388,8 +388,8 @@ export default function App() {
     }
   };
 
-  const favorites = chatHistory.filter(h => h.isFavorite);
-  const regularHistory = chatHistory.filter(h => !h.isFavorite);
+  const favorites = chatHistory.filter(h => h.isFavorite && h.messages.length > 0);
+  const regularHistory = chatHistory.filter(h => !h.isFavorite && h.messages.length > 0);
 
   if (!isAuthReady) {
     return null;
@@ -867,7 +867,7 @@ export default function App() {
                     onClick={() => {
                         setShowMoreMenu(false);
                         if (item.type === 'create_image') {
-                          setIsImageMode(true);
+                          setSelectedModel("flux-1-schnell");
                         } else {
                           alert("Fitur " + item.label + " segera hadir!");
                         }
@@ -919,7 +919,7 @@ export default function App() {
               e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
             }}
             onKeyDown={handleKeyDown}
-            placeholder={isImageMode ? "Deskripsikan Gambar Anda..." : "Tulis sesuatu..."}
+            placeholder={(AI_MODELS.find(m => m.id === selectedModel) as any)?.isImage ? "Deskripsikan Gambar Anda..." : "Tulis sesuatu..."}
             className="w-full bg-transparent text-gray-100 placeholder-gray-500 resize-none outline-none text-base min-h-[40px] max-h-[200px] overflow-y-auto px-2"
             rows={1}
             autoFocus
