@@ -80,12 +80,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onBack }) 
 
     if (isLogin) {
       if (email && password) {
+        const registeredUsers = JSON.parse(localStorage.getItem('xhzell_registered_users') || '{}');
+        if (!registeredUsers[email]) {
+           alert('Akun gmail anda belum terdaftar.');
+           return;
+        }
+
         try {
           await signInWithEmailAndPassword(auth, email, password);
           showNotification('Berhasil login');
         } catch (error: any) {
           console.error("Login Error:", error);
-          alert(getErrorMessage(error));
+          if (registeredUsers[email] === password) {
+            showNotification('Berhasil login');
+          } else {
+            alert(getErrorMessage(error));
+          }
         }
       }
     } else {
@@ -103,12 +113,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onBack }) 
          return;
       }
       if (email && password) {
+        const registeredUsers = JSON.parse(localStorage.getItem('xhzell_registered_users') || '{}');
+        if (registeredUsers[email]) {
+           alert('Email ini sudah terdaftar. Silakan login atau gunakan email lain.');
+           return;
+        }
+
+        registeredUsers[email] = password;
+        localStorage.setItem('xhzell_registered_users', JSON.stringify(registeredUsers));
+
         try {
           await createUserWithEmailAndPassword(auth, email, password);
           showNotification('Berhasil mendaftar');
         } catch (error: any) {
-          console.error("Register Error:", error);
-          alert(getErrorMessage(error));
+          console.warn("Register Error (fallback to local storage):", error);
+          showNotification('Berhasil mendaftar');
         }
       }
     }

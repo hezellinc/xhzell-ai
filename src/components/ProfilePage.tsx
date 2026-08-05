@@ -16,10 +16,21 @@ export function ProfilePage({ onClose, onProfileUpdated }: ProfilePageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const [profileData, setProfileData] = useState<any>(null);
 
   useEffect(() => {
     const loadProfile = async () => {
       if (!auth.currentUser) return;
+      
+      const storedProfile = localStorage.getItem('xhzell_profile_data');
+      if (storedProfile) {
+        try {
+          setProfileData(JSON.parse(storedProfile));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       try {
         const docRef = doc(db, 'users', auth.currentUser.uid);
         const docSnap = await getDoc(docRef);
@@ -130,29 +141,72 @@ export function ProfilePage({ onClose, onProfileUpdated }: ProfilePageProps) {
               </div>
             )}
 
-            <div className="space-y-2">
-              <label className="text-sm text-gray-400 ml-1">Nama</label>
-              <input 
-                type="text" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                maxLength={100}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-purple-500/50 transition-colors"
-                placeholder="Nama Anda"
-              />
-            </div>
+            {profileData && (
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Nama Lengkap</label>
+                  <div className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white opacity-70 cursor-not-allowed">
+                    {profileData.fullName}
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Tanggal</label>
+                    <div className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white opacity-70 cursor-not-allowed text-center">
+                      {profileData.day}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Bulan</label>
+                    <div className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white opacity-70 cursor-not-allowed text-center">
+                      {['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][parseInt(profileData.month) - 1]}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Tahun</label>
+                    <div className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white opacity-70 cursor-not-allowed text-center">
+                      {profileData.year}
+                    </div>
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <label className="text-sm text-gray-400 ml-1">Bio</label>
-              <textarea 
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                maxLength={500}
-                rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-purple-500/50 transition-colors resize-none"
-                placeholder="Ceritakan sedikit tentang Anda"
-              />
-            </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-gray-400 ml-1 uppercase tracking-wider">Laki-laki/Perempuan</label>
+                  <div className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white opacity-70 cursor-not-allowed text-center">
+                    {profileData.gender}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!profileData && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-400 ml-1">Nama</label>
+                  <input 
+                    type="text" 
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={100}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-purple-500/50 transition-colors"
+                    placeholder="Nama Anda"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-400 ml-1">Bio</label>
+                  <textarea 
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    maxLength={500}
+                    rows={4}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 px-4 text-white focus:outline-none focus:border-purple-500/50 transition-colors resize-none"
+                    placeholder="Ceritakan sedikit tentang Anda"
+                  />
+                </div>
+              </>
+            )}
 
             <button
               onClick={handleSave}

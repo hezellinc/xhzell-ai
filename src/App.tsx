@@ -17,6 +17,7 @@ import { HelpPage } from './components/HelpPage';
 import { AboutPage } from './components/AboutPage';
 import { TermsAgreementModal } from './components/TermsAgreementModal';
 import { PromoAnimation } from './components/PromoAnimation';
+import { ProfileSetupFlow } from './components/ProfileSetupFlow';
 import { AccountSettings } from './components/settings/AccountSettings';
 import { PrivacySettings } from './components/settings/PrivacySettings';
 import { AppearanceSettings } from './components/settings/AppearanceSettings';
@@ -68,6 +69,7 @@ export default function App() {
   const [userPhotoURL, setUserPhotoURL] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [hasAgreedTerms, setHasAgreedTerms] = useState(false);
+  const [hasCompletedProfile, setHasCompletedProfile] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [showInstallPopup, setShowInstallPopup] = useState(false);
@@ -80,6 +82,9 @@ export default function App() {
       const agreed = localStorage.getItem('xhzell_terms_agreed') === 'true';
       setHasAgreedTerms(agreed);
       
+      const completedProfile = localStorage.getItem('xhzell_profile_completed') === 'true';
+      setHasCompletedProfile(completedProfile);
+
       if (user) {
         setIsAuthenticated(true);
         let name = user.displayName || user.email?.split('@')[0] || 'User';
@@ -111,7 +116,6 @@ export default function App() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [activeChatId, setActiveChatId] = useState('1');
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<Attachment[]>([]);
   
@@ -120,7 +124,7 @@ export default function App() {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
-    return [{ id: "1", title: "Percakapan baru", isFavorite: false, messages: [] }];
+    return [{ id: "1", title: "Obrolan Baru", isFavorite: false, messages: [] }];
   });
 
   useEffect(() => {
@@ -188,7 +192,7 @@ export default function App() {
 
 
 
-  const activeChat = chatHistory.find(c => c.id === activeChatId) || chatHistory[0] || { id: 'fallback', title: 'Percakapan baru', isFavorite: false, messages: [] };
+  const activeChat = chatHistory.find(c => c.id === activeChatId) || chatHistory[0] || { id: 'fallback', title: 'Obrolan Baru', isFavorite: false, messages: [] };
   const messages = activeChat.messages;
   const isFavorite = activeChat.isFavorite;
 
@@ -226,7 +230,7 @@ export default function App() {
   const handleNewChat = () => {
     const newId = Date.now().toString() + '-' + Math.random().toString(36).substring(2, 9);
     setChatHistory(prev => [
-      { id: newId, title: 'Percakapan baru', isFavorite: false, messages: [] },
+      { id: newId, title: 'Obrolan Baru', isFavorite: false, messages: [] },
       ...prev
     ]);
     setActiveChatId(newId);
@@ -450,6 +454,14 @@ export default function App() {
               timestamp: new Date()
             }]);
           }} />
+        ) : !hasCompletedProfile ? (
+          <ProfileSetupFlow 
+            key="profile" 
+            onComplete={() => {
+              setHasCompletedProfile(true);
+              localStorage.setItem('xhzell_profile_completed', 'true');
+            }} 
+          />
         ) : !hasAgreedTerms ? (
           <TermsAgreementModal 
             key="terms" 
@@ -846,42 +858,6 @@ export default function App() {
                 ))}
               </motion.div>
             )}
-            {showMoreMenu && (
-              <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="absolute bottom-full left-0 w-full flex justify-center space-x-2 mb-3 z-50 origin-bottom"
-              >
-                {[
-                  { type: 'create_image', icon: <ImageIcon size={14} />, label: 'Buat/Edit Gambar', color: 'bg-emerald-500/20 text-emerald-400' },
-                  { type: 'search_image', icon: <Globe size={14} />, label: 'Pencarian Gambar', color: 'bg-amber-500/20 text-amber-400' }
-                ].map((item, i) => (
-                  <motion.button
-                    key={item.type}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ delay: i * 0.05, type: 'spring', stiffness: 400, damping: 15 }}
-                    onClick={() => {
-                        setShowMoreMenu(false);
-                        if (item.type === 'create_image') {
-                          setSelectedModel("flux-1-schnell");
-                        } else {
-                          alert("Fitur " + item.label + " segera hadir!");
-                        }
-                    }}
-                    className="flex items-center space-x-1.5 bg-[#27272a]/95 hover:bg-[#3f3f46] border border-white/10 rounded-full px-3 py-1.5 shadow-xl backdrop-blur-md transition-colors"
-                  >
-                    <div className={`p-1 rounded-full ${item.color}`}>
-                      {item.icon}
-                    </div>
-                    <span className="text-xs font-medium text-gray-200 whitespace-nowrap">{item.label}</span>
-                  </motion.button>
-                ))}
-              </motion.div>
-            )}
           </AnimatePresence>
           {pendingAttachments.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3 px-2">
@@ -931,7 +907,6 @@ export default function App() {
                 whileTap={{ scale: 0.95 }} 
                 onClick={() => {
                   setShowModelMenu(!showModelMenu);
-                  if (showMoreMenu) setShowMoreMenu(false);
                   if (showAttachmentMenu) setShowAttachmentMenu(false);
                 }}
                 className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 transition-colors rounded-full px-3 h-9 md:h-10 border border-white/5 whitespace-nowrap flex-shrink-0"
@@ -972,17 +947,6 @@ export default function App() {
                 )}
               </AnimatePresence>
               
-              <motion.button 
-                whileTap={{ scale: 0.9 }} 
-                onClick={() => {
-                  setShowMoreMenu(!showMoreMenu);
-                  if (showAttachmentMenu) setShowAttachmentMenu(false);
-                  if (showModelMenu) setShowModelMenu(false);
-                }}
-                className={`flex items-center justify-center w-9 h-9 md:w-10 md:h-10 transition-colors rounded-full border flex-shrink-0 ${showMoreMenu ? 'bg-white/20 border-white/20' : 'bg-white/10 border-white/5 hover:bg-white/20'}`}
-              >
-                <MoreHorizontal className="w-4 h-4 md:w-5 md:h-5 text-gray-300" />
-              </motion.button>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -990,7 +954,6 @@ export default function App() {
                 whileTap={{ scale: 0.9 }} 
                 onClick={() => {
                   setShowAttachmentMenu(!showAttachmentMenu);
-                  if (showMoreMenu) setShowMoreMenu(false);
                   if (showModelMenu) setShowModelMenu(false);
                 }}
                 className={`flex items-center justify-center w-9 h-9 md:w-10 md:h-10 transition-colors rounded-full border flex-shrink-0 ${showAttachmentMenu ? 'bg-white/20 border-white/20' : 'bg-white/10 border-white/5 hover:bg-white/20'}`}
