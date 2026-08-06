@@ -1,3 +1,4 @@
+"use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Theme = 'dark' | 'light';
@@ -16,17 +17,18 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem('app-theme') as Theme) || 'dark';
-  });
-  
-  const [fontFamily, setFontFamily] = useState<FontFamily>(() => {
-    return (localStorage.getItem('app-font') as FontFamily) || 'default';
-  });
-  
-  const [fontSize, setFontSize] = useState<FontSize>(() => {
-    return (localStorage.getItem('app-fontsize') as FontSize) || 'medium';
-  });
+  const [theme, setTheme] = useState<Theme>('dark');
+  const [fontFamily, setFontFamily] = useState<FontFamily>('default');
+  const [fontSize, setFontSize] = useState<FontSize>('medium');
+
+  useEffect(() => {
+    const t = localStorage.getItem('app-theme') as Theme;
+    if (t) setTheme(t);
+    const f = localStorage.getItem('app-font') as FontFamily;
+    if (f) setFontFamily(f);
+    const s = localStorage.getItem('app-fontsize') as FontSize;
+    if (s) setFontSize(s);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('app-theme', theme);
@@ -45,11 +47,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [fontSize]);
 
   return (
-    <SettingsContext.Provider value={{
-      theme, setTheme,
-      fontFamily, setFontFamily,
-      fontSize, setFontSize
-    }}>
+    <SettingsContext.Provider value={{ theme, setTheme, fontFamily, setFontFamily, fontSize, setFontSize }}>
       {children}
     </SettingsContext.Provider>
   );
