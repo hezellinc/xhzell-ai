@@ -54,8 +54,8 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-3.5-flash", label: "xsp-3pro", provider: "gemini" },
-  { id: "llama-3.3-70b-specdec", label: "xsp-grok", provider: "groq" },
+  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini" },
+  { id: "openai/gpt-oss-20b", label: "xsp-grok", provider: "groq" },
   { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true },
 ];
 export default function App() {
