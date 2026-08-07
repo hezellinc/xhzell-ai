@@ -21,6 +21,9 @@ import { ProfileSetupFlow } from './components/ProfileSetupFlow';
 import { AccountSettings } from './components/settings/AccountSettings';
 import { PrivacySettings } from './components/settings/PrivacySettings';
 import { AppearanceSettings } from './components/settings/AppearanceSettings';
+import { NotificationSettings } from './components/settings/NotificationSettings';
+
+import { useSettings } from './context/SettingsContext';
 
 type Role = 'user' | 'model';
 
@@ -51,11 +54,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini" },
-  { id: "openai/gpt-oss-20b", label: "xsp-grok", provider: "groq" },
+  { id: "gemini-3.5-flash", label: "xsp-3pro", provider: "gemini" },
+  { id: "llama-3.3-70b-specdec", label: "xsp-grok", provider: "groq" },
   { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true },
 ];
 export default function App() {
+  const { notificationSettings, playNotifSound } = useSettings();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -342,6 +346,17 @@ export default function App() {
       }
 
       updateActiveChatMessages([...newMessages, { role: 'model', text: data.text, attachments: responseAttachments.length > 0 ? responseAttachments : undefined }]);
+      
+      if (notificationSettings.soundEnabled && notificationSettings.aiResponseNotif) {
+        playNotifSound();
+      }
+      if (notificationSettings.pushEnabled && notificationSettings.aiResponseNotif && document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification('XhzellAI', { body: 'Jawaban AI Anda telah siap!', icon: '/Xhzell-logo-transparant.jpg' });
+        } catch (e) {
+          console.error('Push notification error:', e);
+        }
+      }
     } catch (error: any) {
       console.error("Chat Error:", error);
       const errorMessage = error.message || "Server sedang sibuk. Silakan coba beberapa saat lagi.";
@@ -486,6 +501,9 @@ export default function App() {
                   onLogout={async () => {
                     await signOut(auth);
                     setShowSettings(false);
+                  }}
+                  onAddNotification={(notif) => {
+                    setNotifications(prev => [notif, ...prev]);
                   }}
                 />
               )}
@@ -1050,7 +1068,7 @@ function SwipeableChatHistoryItem({
   );
 }
 
-function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: () => void }) {
+function SettingsPage({ onClose, onLogout, onAddNotification }: { onClose: () => void, onLogout: () => void, onAddNotification: (notif: NotificationItem) => void }) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   const settingGroups = [
@@ -1103,6 +1121,8 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
             <PrivacySettings key="privasi" onBack={() => setActiveMenu(null)} />
           ) : activeMenu === 'tampilan' ? (
             <AppearanceSettings key="tampilan" onBack={() => setActiveMenu(null)} />
+          ) : activeMenu === 'notifikasi' ? (
+            <NotificationSettings key="notifikasi" onBack={() => setActiveMenu(null)} onAddNotification={onAddNotification} />
           ) : activeMenu === 'galeri' ? (
             <PromoAnimation key="galeri" onClose={() => setActiveMenu(null)} />
           ) : (
@@ -1133,7 +1153,7 @@ function SettingsPage({ onClose, onLogout }: { onClose: () => void, onLogout: ()
                         <motion.div 
                           key={setting.id}
                           onClick={() => {
-                            if (setting.id === 'akun' || setting.id === 'galeri' || setting.id === 'privasi' || setting.id === 'tampilan') {
+                            if (['akun', 'galeri', 'privasi', 'tampilan', 'notifikasi'].includes(setting.id)) {
                               setActiveMenu(setting.id);
                             }
                           }}
