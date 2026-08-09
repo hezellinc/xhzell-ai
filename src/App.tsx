@@ -54,8 +54,9 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini", status: "online", description: "Cepat dan responsif, cocok untuk tugas teks umum dan tanya jawab." },
-  { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true, status: "connecting", description: "Spesialis dalam menghasilkan gambar berkualitas tinggi dari teks." },
+  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini", status: "online", group: "Gen 1", description: "Cepat dan responsif, cocok untuk tugas teks umum dan tanya jawab." },
+  { id: "openai/gpt-oss-20b:free", label: "xsp-grok", provider: "openrouter", status: "online", group: "Gen 1", description: "Model open source via OpenRouter dengan kapabilitas penalaran canggih (GPT OSS 20b Free)." },
+  { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam menghasilkan gambar berkualitas tinggi dari teks." },
 ];
 export default function App() {
   const { notificationSettings, playNotifSound } = useSettings();
@@ -966,41 +967,57 @@ export default function App() {
                           <X className="w-5 h-5 text-gray-400 hover:text-white" />
                         </button>
                       </div>
-                      <div className="space-y-2">
-                        {AI_MODELS.map((modelItem) => {
-                          const statusColor = modelItem.status === 'online' ? 'bg-green-500' : modelItem.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500';
-                          return (
-                            <button
-                              key={modelItem.id}
-                              onClick={() => {
-                                setSelectedModel(modelItem.id);
-                                setShowModelMenu(false);
-                                handleNewChat();
-                              }}
-                              className={`w-full text-left p-4 rounded-2xl transition-colors border ${
-                                selectedModel === modelItem.id ? 'bg-white/10 border-white/20' : 'bg-transparent border-transparent hover:bg-white/5'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center space-x-2">
-                                  <span className={`font-medium ${selectedModel === modelItem.id ? 'text-white' : 'text-gray-200'}`}>
-                                    {modelItem.label}
-                                  </span>
-                                  {modelItem.isImage && <ImageIcon className="w-3.5 h-3.5 text-purple-400" />}
-                                </div>
-                                <div className="flex items-center space-x-2 text-xs">
-                                  <span className="text-gray-400 capitalize">{modelItem.status}</span>
-                                  <div className={`w-2 h-2 rounded-full ${statusColor}`} />
-                                </div>
-                              </div>
-                              {modelItem.description && (
-                                <p className="text-xs text-gray-400 leading-relaxed mt-1">
-                                  {modelItem.description}
-                                </p>
-                              )}
-                            </button>
-                          );
-                        })}
+                      <div className="space-y-4">
+                        {Object.entries(
+                          AI_MODELS.reduce((acc, modelItem) => {
+                            const group = modelItem.group || "Lainnya";
+                            if (!acc[group]) acc[group] = [];
+                            acc[group].push(modelItem);
+                            return acc;
+                          }, {} as Record<string, typeof AI_MODELS>)
+                        ).map(([groupName, models]) => (
+                          <div key={groupName} className="mb-2 last:mb-0">
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
+                              {groupName}
+                            </h4>
+                            <div className="space-y-2">
+                              {models.map((modelItem) => {
+                                const statusColor = modelItem.status === 'online' ? 'bg-green-500' : modelItem.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500';
+                                return (
+                                  <button
+                                    key={modelItem.id}
+                                    onClick={() => {
+                                      setSelectedModel(modelItem.id);
+                                      setShowModelMenu(false);
+                                      handleNewChat();
+                                    }}
+                                    className={`w-full text-left p-4 rounded-2xl transition-colors border ${
+                                      selectedModel === modelItem.id ? 'bg-white/10 border-white/20' : 'bg-transparent border-transparent hover:bg-white/5'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between mb-1">
+                                      <div className="flex items-center space-x-2">
+                                        <span className={`font-medium ${selectedModel === modelItem.id ? 'text-white' : 'text-gray-200'}`}>
+                                          {modelItem.label}
+                                        </span>
+                                        {modelItem.isImage && <ImageIcon className="w-3.5 h-3.5 text-purple-400" />}
+                                      </div>
+                                      <div className="flex items-center space-x-2 text-xs">
+                                        <span className="text-gray-400 capitalize">{modelItem.status}</span>
+                                        <div className={`w-2 h-2 rounded-full ${statusColor}`} />
+                                      </div>
+                                    </div>
+                                    {modelItem.description && (
+                                      <p className="text-xs text-gray-400 leading-relaxed mt-1">
+                                        {modelItem.description}
+                                      </p>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </motion.div>
                   </>

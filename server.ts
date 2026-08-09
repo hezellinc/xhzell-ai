@@ -147,6 +147,46 @@ If you use web search to find information, always include the source links in a 
       
       res.json({ text: "Berikut gambar yang Anda minta:", images: [fallbackImageUrl] });
       
+    } else if (selectedProvider === "openrouter") {
+      if (!process.env.OPENROUTER_API_KEY) {
+        throw new Error("OPENROUTER_API_KEY belum dikonfigurasi di file .env");
+      }
+      
+      const messages = [{ role: "system", content: finalSystemPrompt }];
+      
+      if (typeof contents === "string") {
+        messages.push({ role: "user", content: contents });
+      } else if (Array.isArray(contents)) {
+        for (const msg of contents) {
+          if (msg.role === "user" || msg.role === "model") {
+             const role = msg.role === "model" ? "assistant" : "user";
+             const content = Array.isArray(msg.parts) ? msg.parts.map((p: any) => p.text).join("\n") : msg.parts?.text || String(msg);
+             messages.push({ role, content });
+          }
+        }
+      }
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: messages,
+          reasoning: { enabled: true }
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`OpenRouter API Error: ${err}`);
+      }
+
+      const result = await response.json();
+      res.json({ text: result.choices[0].message.content });
+
     } else {
       res.status(400).json({ error: "Invalid provider selected" });
     }
