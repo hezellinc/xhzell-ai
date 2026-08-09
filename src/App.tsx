@@ -55,11 +55,11 @@ import { auth, db } from './firebase';
 
 const AI_MODELS = [
   { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini", status: "online", description: "Cepat dan responsif, cocok untuk tugas teks umum dan tanya jawab." },
-  { id: "openai/gpt-oss-20b", label: "xsp-grok", provider: "pollinations", status: "online", description: "Handal untuk pemecahan masalah dan pemrograman kompleks." },
+  { id: "openai", label: "xsp-grok", provider: "pollinations", status: "online", description: "Handal untuk pemecahan masalah dan pemrograman kompleks." },
   { id: "command-r", label: "xsp-cohere-cmd", provider: "cohere", status: "connecting", description: "Model canggih dari Cohere, hebat dalam penalaran dan pencarian informasi." },
   { id: "mistral-small-latest", label: "xsp-mistral-sm", provider: "mistral", status: "connecting", description: "Ringan dan sangat efisien dari Mistral AI." },
   { id: "HuggingFaceH4/zephyr-7b-beta", label: "xsp-hf-zephyr", provider: "huggingface", status: "connecting", description: "Model open-source cepat yang di-host di Hugging Face." },
-  { id: "llama3-8b-8192", label: "xsp-groq-llama3", provider: "groq", status: "connecting", description: "Sangat cepat! Dijalankan menggunakan teknologi LPU Groq." },
+  { id: "llama-3.1-8b-instant", label: "xsp-groq-llama3", provider: "groq", status: "connecting", description: "Sangat cepat! Dijalankan menggunakan teknologi LPU Groq." },
   { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true, status: "connecting", description: "Spesialis dalam menghasilkan gambar berkualitas tinggi dari teks." },
 ];
 export default function App() {
