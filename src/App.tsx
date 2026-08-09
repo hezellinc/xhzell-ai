@@ -54,9 +54,13 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini" },
-  { id: "openai/gpt-oss-20b", label: "xsp-grok", provider: "pollinations" },
-  { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true },
+  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini", status: "online", description: "Cepat dan responsif, cocok untuk tugas teks umum dan tanya jawab." },
+  { id: "openai/gpt-oss-20b", label: "xsp-grok", provider: "pollinations", status: "online", description: "Handal untuk pemecahan masalah dan pemrograman kompleks." },
+  { id: "command-r", label: "xsp-cohere-cmd", provider: "cohere", status: "connecting", description: "Model canggih dari Cohere, hebat dalam penalaran dan pencarian informasi." },
+  { id: "mistral-small-latest", label: "xsp-mistral-sm", provider: "mistral", status: "connecting", description: "Ringan dan sangat efisien dari Mistral AI." },
+  { id: "HuggingFaceH4/zephyr-7b-beta", label: "xsp-hf-zephyr", provider: "huggingface", status: "connecting", description: "Model open-source cepat yang di-host di Hugging Face." },
+  { id: "llama3-8b-8192", label: "xsp-groq-llama3", provider: "groq", status: "connecting", description: "Sangat cepat! Dijalankan menggunakan teknologi LPU Groq." },
+  { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true, status: "connecting", description: "Spesialis dalam menghasilkan gambar berkualitas tinggi dari teks." },
 ];
 export default function App() {
   const { notificationSettings, playNotifSound } = useSettings();
@@ -78,7 +82,7 @@ export default function App() {
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [showInstallPopup, setShowInstallPopup] = useState(false);
   
-  const [selectedModel, setSelectedModel] = useState('gemini-3.5-flash');
+  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
   const [showModelMenu, setShowModelMenu] = useState(false);
   
   useEffect(() => {
@@ -927,41 +931,84 @@ export default function App() {
                   setShowModelMenu(!showModelMenu);
                   if (showAttachmentMenu) setShowAttachmentMenu(false);
                 }}
-                className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 transition-colors rounded-full px-3 h-9 md:h-10 border border-white/5 whitespace-nowrap flex-shrink-0"
+                className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 transition-colors rounded-full px-3 h-9 md:h-10 border border-white/5 whitespace-nowrap flex-shrink-0"
               >
-                <span className="text-xs md:text-sm font-medium text-gray-200 truncate max-w-[80px] md:max-w-[120px] inline-block align-bottom">
-                  {AI_MODELS.find(m => m.id === selectedModel)?.label || "Select Model"}
-                </span>
+                {(() => {
+                  const model = AI_MODELS.find(m => m.id === selectedModel);
+                  const statusColor = model?.status === 'online' ? 'bg-green-500' : model?.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500';
+                  return (
+                    <>
+                      <div className={`w-2 h-2 rounded-full ${statusColor}`} />
+                      <span className="text-xs md:text-sm font-medium text-gray-200 truncate max-w-[80px] md:max-w-[120px] inline-block align-bottom">
+                        {model?.label || "Select Model"}
+                      </span>
+                    </>
+                  );
+                })()}
                 <ChevronDown className="w-4 h-4 text-gray-400" />
               </motion.button>
 
               <AnimatePresence>
                 {showModelMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute bottom-full left-0 mb-2 w-48 bg-[#27272a]/95 border border-white/10 rounded-xl shadow-xl backdrop-blur-md overflow-hidden z-50 origin-bottom-left"
-                  >
-                    {AI_MODELS.map((modelItem) => (
-
-                      <button
-                        key={modelItem.id}
-                        onClick={() => {
-                          setSelectedModel(modelItem.id);
-                          setShowModelMenu(false);
-                          handleNewChat();
-                        }}
-
-                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                          selectedModel === modelItem.id ? 'bg-white/10 text-white font-medium' : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        {modelItem.label}
-                      </button>
-                    ))}
-                  </motion.div>
+                  <>
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
+                      onClick={() => setShowModelMenu(false)}
+                    />
+                    <motion.div
+                      initial={{ y: '100%' }}
+                      animate={{ y: 0 }}
+                      exit={{ y: '100%' }}
+                      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                      className="fixed bottom-0 left-0 right-0 z-[70] bg-zinc-900 rounded-t-3xl border-t border-white/10 p-4 pb-8 max-h-[85vh] overflow-y-auto shadow-[0_-8px_40px_rgba(0,0,0,0.5)] md:max-w-md md:mx-auto"
+                    >
+                      <div className="flex items-center justify-between mb-4 px-2">
+                        <h3 className="text-lg font-medium text-white">Pilih Model AI</h3>
+                        <button onClick={() => setShowModelMenu(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                          <X className="w-5 h-5 text-gray-400 hover:text-white" />
+                        </button>
+                      </div>
+                      <div className="space-y-2">
+                        {AI_MODELS.map((modelItem) => {
+                          const statusColor = modelItem.status === 'online' ? 'bg-green-500' : modelItem.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500';
+                          return (
+                            <button
+                              key={modelItem.id}
+                              onClick={() => {
+                                setSelectedModel(modelItem.id);
+                                setShowModelMenu(false);
+                                handleNewChat();
+                              }}
+                              className={`w-full text-left p-4 rounded-2xl transition-colors border ${
+                                selectedModel === modelItem.id ? 'bg-white/10 border-white/20' : 'bg-transparent border-transparent hover:bg-white/5'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center space-x-2">
+                                  <span className={`font-medium ${selectedModel === modelItem.id ? 'text-white' : 'text-gray-200'}`}>
+                                    {modelItem.label}
+                                  </span>
+                                  {modelItem.isImage && <ImageIcon className="w-3.5 h-3.5 text-purple-400" />}
+                                </div>
+                                <div className="flex items-center space-x-2 text-xs">
+                                  <span className="text-gray-400 capitalize">{modelItem.status}</span>
+                                  <div className={`w-2 h-2 rounded-full ${statusColor}`} />
+                                </div>
+                              </div>
+                              {modelItem.description && (
+                                <p className="text-xs text-gray-400 leading-relaxed mt-1">
+                                  {modelItem.description}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  </>
                 )}
               </AnimatePresence>
               

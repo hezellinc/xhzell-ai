@@ -147,6 +147,37 @@ If you use web search to find information, always include the source links in a 
       
       res.json({ text: "Berikut gambar yang Anda minta:", images: [fallbackImageUrl] });
       
+    } else if (selectedProvider === "groq") {
+      if (!process.env.GROQ_API_KEY) {
+        throw new Error("GROQ_API_KEY belum dikonfigurasi di file .env");
+      }
+      const messages = Array.isArray(contents) ? contents.map((m: any) => ({
+        role: m.role === 'model' ? 'assistant' : 'user',
+        content: Array.isArray(m.parts) ? m.parts.map((p:any) => p.text).join(" ") : m.parts?.text || String(m)
+      })) : [{ role: 'user', content: String(contents) }];
+      
+      messages.unshift({ role: 'system', content: finalSystemPrompt });
+      
+      const completion = await groq.chat.completions.create({
+        messages,
+        model: selectedModel,
+      });
+      res.json({ text: completion.choices[0]?.message?.content || "", images: [] });
+    } else if (selectedProvider === "cohere") {
+      if (!process.env.COHERE_API_KEY) {
+        throw new Error("COHERE_API_KEY belum dikonfigurasi di file .env. Anda membutuhkan API Key Cohere untuk model ini.");
+      }
+      res.status(501).json({ error: "Cohere integration is set up but requires key configuration in server.ts" });
+    } else if (selectedProvider === "mistral") {
+      if (!process.env.MISTRAL_API_KEY) {
+        throw new Error("MISTRAL_API_KEY belum dikonfigurasi di file .env. Anda membutuhkan API Key Mistral untuk model ini.");
+      }
+      res.status(501).json({ error: "Mistral integration is set up but requires key configuration in server.ts" });
+    } else if (selectedProvider === "huggingface") {
+      if (!process.env.HF_TOKEN) {
+        throw new Error("HF_TOKEN belum dikonfigurasi di file .env. Anda membutuhkan Token Hugging Face untuk model ini.");
+      }
+      res.status(501).json({ error: "Hugging Face integration is set up but requires key configuration in server.ts" });
     } else if (selectedProvider === "pollinations") {
       const messages = [{ role: "system", content: finalSystemPrompt }];
       
