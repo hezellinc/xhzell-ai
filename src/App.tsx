@@ -59,7 +59,7 @@ const AI_MODELS = [
   { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Kapasitas pemrosesan tinggi, sangat ahli dalam penulisan dan analisis kode.", tags: ["Coding"] },
   { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam generasi gambar bergaya seni digital dan anime.", tags: ["Art", "Anime"] },
   { id: "fish-audio/s2.1-pro-free:free", label: "XeeSpeech", provider: "openrouter", status: "online", group: "Gen 1", description: "Model khusus untuk menghasilkan suara natural dan pembacaan teks.", tags: ["Voice", "TTS"] },
-  { id: "deepseek-v3.2", label: "DeepSeek V3.2", provider: "maxrouter", status: "online", group: "MaxRouter", description: "Model deepseek-v3.2 kustom", tags: ["Reasoning"] },
+  { id: "deepseek-v3.2", label: "XeeTron Flash 2.0", provider: "maxrouter", status: "online", group: "Gen 1", description: "Model canggih yang sangat stabil dan dioptimalkan untuk penulisan kode tingkat lanjut.", tags: ["Advanced Coding", "Stable"] },
 ];
 const MessageActions = ({ text }: { text: string }) => {
   const [liked, setLiked] = useState(false);
