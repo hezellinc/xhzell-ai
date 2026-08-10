@@ -54,10 +54,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini", status: "online", group: "Gen 1", description: "Cepat dan responsif, cocok untuk tugas teks umum dan tanya jawab." },
-  { id: "openai/gpt-oss-20b:free", label: "xsp-grok", provider: "openrouter", status: "online", group: "Gen 1", description: "Model open source via OpenRouter dengan kapabilitas penalaran canggih (GPT OSS 20b Free)." },
-  { id: "poolside/laguna-s-2.1:free", label: "xsp-laguna", provider: "openrouter", status: "online", group: "Gen 1", description: "Model canggih dari Poolside, andal untuk penalaran dan pemrograman (Laguna S 2.1)." },
-  { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam menghasilkan gambar berkualitas tinggi dari teks." },
+  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.0", provider: "gemini", status: "online", group: "Gen 1", description: "Model cepat, efisien, dan hemat memori" },
+  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", description: "Model standar untuk tugas umum" },
+  { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Model dengan kapasitas pemrosesan lebih tinggi" },
+  { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Model pembuatan gambar berkualitas tinggi" },
 ];
 export default function App() {
   const { notificationSettings, playNotifSound } = useSettings();
@@ -812,8 +812,8 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      <div className="text-xs font-medium text-gray-400 bg-white/5 inline-flex items-center self-start px-2 py-1 rounded-md border border-white/10 mb-1">
-                        <Sparkles size={12} className="mr-1.5 text-purple-400" />
+                      <div className="text-xs font-medium text-white/50 bg-transparent inline-flex items-center self-start mb-1">
+                        <img src="/Xhzell-logo-transparant.jpg" alt="AI" className="w-4 h-4 mr-1.5 rounded-full object-contain opacity-70" />
                         {AI_MODELS.find(m => m.id === selectedModel)?.label || "AI"}
                       </div>
                       
