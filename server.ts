@@ -208,8 +208,14 @@ If you use web search to find information, always include the source links in a 
       }
 
       let endpointUrl = baseUrl.replace(/\/$/, "");
-      if (!endpointUrl.endsWith("/chat/completions") && !endpointUrl.endsWith("/llm-api")) {
-        endpointUrl += "/chat/completions";
+      if (!endpointUrl.endsWith("/chat/completions")) {
+        if (endpointUrl.endsWith("/llm-api")) {
+          endpointUrl += "/v1/chat/completions";
+        } else if (!endpointUrl.endsWith("/v1")) {
+          endpointUrl += "/v1/chat/completions";
+        } else {
+          endpointUrl += "/chat/completions";
+        }
       }
 
       const response = await fetch(endpointUrl, {
@@ -224,12 +230,23 @@ If you use web search to find information, always include the source links in a 
         })
       });
 
+      const resultText = await response.text();
+      
       if (!response.ok) {
-        const err = await response.text();
-        throw new Error(`MaxRouter API Error: ${err}`);
+        throw new Error(`MaxRouter API Error (${response.status} pada ${endpointUrl}): ${resultText}`);
       }
 
-      const result = await response.json();
+      let result;
+      try {
+        result = JSON.parse(resultText);
+      } catch (e) {
+        throw new Error(`MaxRouter API Error: Respons bukan JSON yang valid dari ${endpointUrl}. Respons: ${resultText.substring(0, 100)}...`);
+      }
+
+      if (!result.choices || !result.choices[0] || !result.choices[0].message) {
+        throw new Error(`MaxRouter API Error: Format JSON tidak sesuai (missing choices). Respons: ${resultText.substring(0, 100)}...`);
+      }
+
       res.json({ text: result.choices[0].message.content });
 
     } else {
