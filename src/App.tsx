@@ -54,10 +54,10 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.0", provider: "gemini", status: "online", group: "Gen 1", description: "Model cepat, efisien, dan hemat memori" },
-  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", description: "Model standar untuk tugas umum" },
-  { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Model dengan kapasitas pemrosesan lebih tinggi" },
-  { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Model pembuatan gambar berkualitas tinggi" },
+  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.1", provider: "gemini", status: "online", group: "Gen 1", description: "Sangat cepat untuk tanya jawab dan penyelesaian tugas harian.", tags: ["Question", "Task", "Fast"] },
+  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", description: "Model yang dioptimalkan untuk pembuatan konten dan strategi SEO.", tags: ["SEO"] },
+  { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Kapasitas pemrosesan tinggi, sangat ahli dalam penulisan dan analisis kode.", tags: ["Coding"] },
+  { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam generasi gambar bergaya seni digital dan anime.", tags: ["Art", "Anime"] },
 ];
 export default function App() {
   const { notificationSettings, playNotifSound } = useSettings();
@@ -1023,6 +1023,15 @@ export default function App() {
                                       <p className="text-xs text-gray-400 leading-relaxed mt-1">
                                         {modelItem.description}
                                       </p>
+                                    )}
+                                    {modelItem.tags && (
+                                      <div className="flex flex-wrap gap-1.5 mt-2">
+                                        {modelItem.tags.map((tag, idx) => (
+                                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-300">
+                                            {tag}
+                                          </span>
+                                        ))}
+                                      </div>
                                     )}
                                   </button>
                                 );
