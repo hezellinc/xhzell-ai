@@ -56,7 +56,7 @@ import { auth, db } from './firebase';
 import puter from '@heyputer/puter.js';
 
 const AI_MODELS = [
-  { id: "claude-3-5-sonnet", label: "XeeTron Gen2 Pro", provider: "puter", status: "online", group: "Gen 2", description: "Model AI canggih dari Anthropic (Claude 3.5 Sonnet) melalui Puter.js.", tags: ["Advanced", "Reasoning"] },
+  { id: "claude-sonnet-5", label: "XeeTron Gen2 Pro", provider: "puter", status: "online", group: "Gen 2", description: "Model AI canggih dari Anthropic (Claude 3.5 Sonnet) melalui Puter.js.", tags: ["Advanced", "Reasoning"] },
   { id: "gpt-4o", label: "XeeTron Gen2 Vision", provider: "puter", status: "online", group: "Gen 2", description: "Model AI multimodal canggih dari OpenAI (GPT-4o) melalui Puter.js.", tags: ["Multimodal", "Advanced"] },
   { id: "deepseek-v3.2", label: "XeeTron Pro 3.0", provider: "maxrouter", status: "online", group: "Gen 1", description: "Model paling canggih dengan penalaran mendalam dan sangat ahli dalam penulisan kode tingkat lanjut.", tags: ["Advanced Coding", "Thinking"] },
   { id: "openai/gpt-oss-20b:free-flash", baseModel: "openai/gpt-oss-20b:free", label: "XeeTron Flash 2.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Model stabil dengan kecepatan tinggi, ideal untuk pembuatan konten tingkat lanjut dan SEO.", tags: ["SEO", "Stable", "Fast"] },
@@ -425,9 +425,17 @@ export default function App() {
         });
 
         try {
-          const resp = await puter.ai.chat(puterMessages, { model: actualModel });
+          if (!puter.auth.isSignedIn()) {
+             await puter.auth.signIn();
+          }
+          // @ts-ignore - bypass type mismatch for multimodal payload
+          const resp = await puter.ai.chat(puterMessages as any, { model: actualModel });
+          // @ts-ignore
           responseText = resp?.message?.content || resp?.text || (typeof resp === 'string' ? resp : JSON.stringify(resp));
         } catch (err: any) {
+           if (err.message && err.message.includes('Unauthorized')) {
+               throw new Error("Sesi Puter kadaluarsa atau tidak valid. Silakan coba lagi untuk login.");
+           }
            throw new Error(err.message || 'Puter.js error');
         }
       } else {
