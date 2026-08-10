@@ -207,7 +207,12 @@ If you use web search to find information, always include the source links in a 
         }
       }
 
-      const response = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
+      let endpointUrl = baseUrl.replace(/\/$/, "");
+      if (!endpointUrl.endsWith("/chat/completions") && !endpointUrl.endsWith("/llm-api")) {
+        endpointUrl += "/chat/completions";
+      }
+
+      const response = await fetch(endpointUrl, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${process.env.MAXROUTER_API_KEY}`,
