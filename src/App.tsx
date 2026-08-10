@@ -56,14 +56,17 @@ import { auth, db } from './firebase';
 import puter from '@heyputer/puter.js';
 
 const AI_MODELS = [
-  { id: "claude-sonnet-5", label: "XeeTron Gen2 Pro", provider: "puter", status: "online", group: "Gen 2", description: "Model AI canggih dari Anthropic (Claude 3.5 Sonnet) melalui Puter.js.", tags: ["Advanced", "Reasoning"] },
-  { id: "gpt-4o", label: "XeeTron Gen2 Vision", provider: "puter", status: "online", group: "Gen 2", description: "Model AI multimodal canggih dari OpenAI (GPT-4o) melalui Puter.js.", tags: ["Multimodal", "Advanced"] },
-  { id: "deepseek-v3.2", label: "XeeTron Pro 3.0", provider: "maxrouter", status: "online", group: "Gen 1", description: "Model paling canggih dengan penalaran mendalam dan sangat ahli dalam penulisan kode tingkat lanjut.", tags: ["Advanced Coding", "Thinking"] },
-  { id: "openai/gpt-oss-20b:free-flash", baseModel: "openai/gpt-oss-20b:free", label: "XeeTron Flash 2.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Model stabil dengan kecepatan tinggi, ideal untuk pembuatan konten tingkat lanjut dan SEO.", tags: ["SEO", "Stable", "Fast"] },
-  { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Kapasitas pemrosesan tinggi, sangat ahli dalam penulisan dan analisis kode.", tags: ["Coding"] },
-  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", description: "Model yang dioptimalkan untuk pembuatan konten dan strategi SEO.", tags: ["SEO"] },
-  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.1", provider: "gemini", status: "online", group: "Gen 1", description: "Sangat cepat untuk tanya jawab dan penyelesaian tugas harian.", tags: ["Question", "Task", "Fast"] },
-  { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam generasi gambar bergaya seni digital dan anime.", tags: ["Art", "Anime"] },
+  { id: "claude-3.7-sonnet", label: "XeeTron 3.5 Flash", provider: "puter", status: "online", group: "Gen 2" },
+  { id: "gpt-4o", label: "Xeetron 3.5 Lite", provider: "puter", status: "online", group: "Gen 2" },
+  { id: "deepseek-v3.2", label: "XeeTron Pro 3.0", provider: "maxrouter", status: "online", group: "Gen 1" },
+  { id: "deepseek-v3", label: "Xeetron 3.7", provider: "puter", status: "online", group: "Gen 2" },
+  { id: "gemini-3.5-flash-lite", label: "XeeTron 3.5 Plus", provider: "puter", status: "online", group: "Gen 2" },
+  { id: "gpt-5-nano", label: "Xeetron 3.7 Plus", provider: "puter", status: "online", group: "Gen 2" },
+  { id: "openai/gpt-oss-20b:free-flash", baseModel: "openai/gpt-oss-20b:free", label: "XeeTron Flash 2.5", provider: "openrouter", status: "online", group: "Gen 1" },
+  { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1" },
+  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1" },
+  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.1", provider: "gemini", status: "online", group: "Gen 1" },
+  { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1" },
 ];
 const MessageActions = ({ text }: { text: string }) => {
   const [liked, setLiked] = useState(false);
@@ -430,8 +433,23 @@ export default function App() {
           }
           // @ts-ignore - bypass type mismatch for multimodal payload
           const resp = await puter.ai.chat(puterMessages as any, { model: actualModel });
-          // @ts-ignore
-          responseText = resp?.message?.content || resp?.text || (typeof resp === 'string' ? resp : JSON.stringify(resp));
+          if (typeof resp === 'string') {
+            responseText = resp;
+          } else if (resp && typeof resp === 'object') {
+            if (typeof resp.text === 'string') {
+              responseText = resp.text;
+            } else if (typeof resp.message?.content === 'string') {
+              responseText = resp.message.content;
+            } else {
+              try {
+                responseText = JSON.stringify(resp);
+              } catch (e) {
+                responseText = String(resp);
+              }
+            }
+          } else {
+            responseText = String(resp);
+          }
         } catch (err: any) {
            if (err.message && err.message.includes('Unauthorized')) {
                throw new Error("Sesi Puter kadaluarsa atau tidak valid. Silakan coba lagi untuk login.");
@@ -1140,20 +1158,6 @@ export default function App() {
                                         <div className={`w-2 h-2 rounded-full ${statusColor}`} />
                                       </div>
                                     </div>
-                                    {modelItem.description && (
-                                      <p className="text-xs text-gray-400 leading-relaxed mt-1">
-                                        {modelItem.description}
-                                      </p>
-                                    )}
-                                    {modelItem.tags && (
-                                      <div className="flex flex-wrap gap-1.5 mt-2">
-                                        {modelItem.tags.map((tag, idx) => (
-                                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-300">
-                                            {tag}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    )}
                                   </button>
                                 );
                               })}
