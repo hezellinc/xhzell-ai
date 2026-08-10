@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, Bell, User, Settings, Star, PlusCircle, 
   ChevronDown, MoreHorizontal, Plus, AudioLines, ArrowUp, Sparkles, Heart, X, Clock, Trash2, Shield, Smartphone, Monitor, Database, Globe, Zap, Key, Hexagon, ChevronRight,
-  Image as ImageIcon, FileText, Video, HelpCircle, Info, Film, ArrowLeft
+  Image as ImageIcon, FileText, Video, HelpCircle, Info, Film, ArrowLeft, Copy, Share2, Volume2
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
@@ -58,7 +58,62 @@ const AI_MODELS = [
   { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", description: "Model yang dioptimalkan untuk pembuatan konten dan strategi SEO.", tags: ["SEO"] },
   { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Kapasitas pemrosesan tinggi, sangat ahli dalam penulisan dan analisis kode.", tags: ["Coding"] },
   { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam generasi gambar bergaya seni digital dan anime.", tags: ["Art", "Anime"] },
+  { id: "fish-audio/s2.1-pro-free:free", label: "XeeSpeech", provider: "openrouter", status: "online", group: "Gen 1", description: "Model khusus untuk menghasilkan suara natural dan pembacaan teks.", tags: ["Voice", "TTS"] },
 ];
+const MessageActions = ({ text }: { text: string }) => {
+  const [liked, setLiked] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'XhzellAI',
+          text: text,
+        });
+      } else {
+        handleCopy();
+      }
+    } catch (e) {}
+  };
+
+  const handleSpeech = () => {
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+    } else {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onend = () => setIsPlaying(false);
+      window.speechSynthesis.speak(utterance);
+      setIsPlaying(true);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
+      <motion.button whileTap={{ scale: 0.9 }} onClick={() => setLiked(!liked)} className={`p-1.5 rounded-md transition-colors ${liked ? 'text-red-500 bg-red-500/10' : 'text-gray-400 hover:text-white hover:bg-white/10'}`} title="Like">
+        <Heart size={14} className={liked ? "fill-current" : ""} />
+      </motion.button>
+      <motion.button whileTap={{ scale: 0.9 }} onClick={handleCopy} className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors" title="Salin">
+        <Copy size={14} className={copied ? "text-green-400" : ""} />
+      </motion.button>
+      <motion.button whileTap={{ scale: 0.9 }} onClick={handleShare} className="p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-colors" title="Share">
+        <Share2 size={14} />
+      </motion.button>
+      <motion.button whileTap={{ scale: 0.9 }} onClick={handleSpeech} className={`p-1.5 rounded-md transition-colors ${isPlaying ? 'text-purple-400 bg-purple-400/10' : 'text-gray-400 hover:text-white hover:bg-white/10'}`} title="Suara">
+        <Volume2 size={14} />
+      </motion.button>
+    </div>
+  );
+};
+
 export default function App() {
   const { notificationSettings, playNotifSound } = useSettings();
   const [input, setInput] = useState('');
@@ -83,6 +138,7 @@ export default function App() {
   
   const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
   const [showModelMenu, setShowModelMenu] = useState(false);
+  const [showAllModels, setShowAllModels] = useState(false);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -830,9 +886,12 @@ export default function App() {
                       )}
                       
                       {msg.text && (
-                        <div className="markdown-body prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 prose-headings:font-semibold prose-a:text-purple-400 font-sans text-[15px] md:text-base tracking-wide">
-                          <Markdown>{msg.text}</Markdown>
-                        </div>
+                        <>
+                          <div className="markdown-body prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/10 prose-headings:font-semibold prose-a:text-purple-400 font-sans text-[15px] md:text-base tracking-wide">
+                            <Markdown>{msg.text}</Markdown>
+                          </div>
+                          <MessageActions text={msg.text} />
+                        </>
                       )}
                     </div>
                   )}
@@ -993,7 +1052,7 @@ export default function App() {
                               {groupName}
                             </h4>
                             <div className="space-y-2">
-                              {models.map((modelItem) => {
+                              {(showAllModels ? models : models.slice(0, 3)).map((modelItem) => {
                                 const statusColor = modelItem.status === 'online' ? 'bg-green-500' : modelItem.status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500';
                                 return (
                                   <button
@@ -1036,6 +1095,14 @@ export default function App() {
                                   </button>
                                 );
                               })}
+                              {!showAllModels && models.length > 3 && (
+                                <button
+                                  onClick={() => setShowAllModels(true)}
+                                  className="w-full text-center p-3 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium text-gray-300 transition-colors"
+                                >
+                                  See all more
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}
