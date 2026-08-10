@@ -40,6 +40,7 @@ interface Message {
   role: Role;
   text: string;
   attachments?: Attachment[];
+  modelId?: string;
 }
 
 interface ChatHistoryItem {
@@ -54,11 +55,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
 const AI_MODELS = [
-  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.1", provider: "gemini", status: "online", group: "Gen 1", description: "Sangat cepat untuk tanya jawab dan penyelesaian tugas harian.", tags: ["Question", "Task", "Fast"] },
-  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", description: "Model yang dioptimalkan untuk pembuatan konten dan strategi SEO.", tags: ["SEO"] },
+  { id: "deepseek-v3.2", label: "XeeTron Pro 3.0", provider: "maxrouter", status: "online", group: "Gen 1", description: "Model paling canggih dengan penalaran mendalam dan sangat ahli dalam penulisan kode tingkat lanjut.", tags: ["Advanced Coding", "Thinking"] },
+  { id: "openai/gpt-oss-20b:free-flash", baseModel: "openai/gpt-oss-20b:free", label: "XeeTron Flash 2.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Model stabil dengan kecepatan tinggi, ideal untuk pembuatan konten tingkat lanjut dan SEO.", tags: ["SEO", "Stable", "Fast"] },
   { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Kapasitas pemrosesan tinggi, sangat ahli dalam penulisan dan analisis kode.", tags: ["Coding"] },
+  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", description: "Model yang dioptimalkan untuk pembuatan konten dan strategi SEO.", tags: ["SEO"] },
+  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.1", provider: "gemini", status: "online", group: "Gen 1", description: "Sangat cepat untuk tanya jawab dan penyelesaian tugas harian.", tags: ["Question", "Task", "Fast"] },
   { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam generasi gambar bergaya seni digital dan anime.", tags: ["Art", "Anime"] },
-  { id: "deepseek-v3.2", label: "XeeTron Flash 2.0", provider: "maxrouter", status: "online", group: "Gen 1", description: "Model canggih yang sangat stabil dan dioptimalkan untuk penulisan kode tingkat lanjut.", tags: ["Advanced Coding", "Stable"] },
 ];
 const MessageActions = ({ text }: { text: string }) => {
   const [liked, setLiked] = useState(false);
@@ -136,9 +138,15 @@ export default function App() {
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [showInstallPopup, setShowInstallPopup] = useState(false);
   
-  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
+  const [selectedModel, setSelectedModel] = useState(() => {
+    return localStorage.getItem('xhzell_selected_model') || 'gemini-2.5-flash';
+  });
   const [showModelMenu, setShowModelMenu] = useState(false);
   const [showAllModels, setShowAllModels] = useState(false);
+  
+  useEffect(() => {
+    localStorage.setItem('xhzell_selected_model', selectedModel);
+  }, [selectedModel]);
   
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -381,7 +389,7 @@ export default function App() {
       });
       const selectedModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
       const imageRequested = (selectedModelObj as any).isImage;
-      const actualModel = imageRequested ? "flux-1-schnell" : selectedModel;
+      const actualModel = imageRequested ? "flux-1-schnell" : (selectedModelObj as any).baseModel || selectedModel;
       const actualProvider = imageRequested ? "cloudflare" : selectedModelObj.provider;
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -407,7 +415,7 @@ export default function App() {
         });
       }
 
-      updateActiveChatMessages([...newMessages, { role: 'model', text: data.text, attachments: responseAttachments.length > 0 ? responseAttachments : undefined }]);
+      updateActiveChatMessages([...newMessages, { role: 'model', text: data.text, attachments: responseAttachments.length > 0 ? responseAttachments : undefined, modelId: selectedModel }]);
       
       if (notificationSettings.soundEnabled && notificationSettings.aiResponseNotif) {
         playNotifSound();
@@ -422,7 +430,7 @@ export default function App() {
     } catch (error: any) {
       console.error("Chat Error:", error);
       const errorMessage = error.message || "Server sedang sibuk. Silakan coba beberapa saat lagi.";
-      updateActiveChatMessages([...newMessages, { role: 'model', text: errorMessage }]);
+      updateActiveChatMessages([...newMessages, { role: 'model', text: errorMessage, modelId: selectedModel }]);
     } finally {
       setIsLoading(false);
       setIsGeneratingImage(false);
@@ -870,7 +878,7 @@ export default function App() {
                     <div className="flex flex-col gap-3">
                       <div className="text-xs font-medium text-white/50 bg-transparent inline-flex items-center self-start mb-1">
                         <img src="/Xhzell-logo-transparant.jpg" alt="AI" className="w-4 h-4 mr-1.5 rounded-full object-contain opacity-70" />
-                        {AI_MODELS.find(m => m.id === selectedModel)?.label || "AI"}
+                        {AI_MODELS.find(m => m.id === (msg.modelId || selectedModel))?.label || "AI"}
                       </div>
                       
                       {msg.attachments && msg.attachments.length > 0 && (
