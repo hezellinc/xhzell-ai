@@ -152,7 +152,7 @@ If you use web search to find information, always include the source links in a 
         throw new Error("OPENROUTER_API_KEY belum dikonfigurasi di file .env");
       }
       
-      const messages = [{ role: "system", content: finalSystemPrompt }];
+      const messages: any[] = [{ role: "system", content: finalSystemPrompt }];
       
       if (typeof contents === "string") {
         messages.push({ role: "user", content: contents });
@@ -160,7 +160,22 @@ If you use web search to find information, always include the source links in a 
         for (const msg of contents) {
           if (msg.role === "user" || msg.role === "model") {
              const role = msg.role === "model" ? "assistant" : "user";
-             const content = Array.isArray(msg.parts) ? msg.parts.map((p: any) => p.text).join("\n") : msg.parts?.text || String(msg);
+             let content: any;
+             if (Array.isArray(msg.parts)) {
+               const hasImages = msg.parts.some((p: any) => p.inlineData);
+               if (hasImages) {
+                 content = msg.parts.map((p: any) => {
+                   if (p.inlineData) {
+                     return { type: "image_url", image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } };
+                   }
+                   return { type: "text", text: p.text || "" };
+                 });
+               } else {
+                 content = msg.parts.map((p: any) => p.text).join("\n");
+               }
+             } else {
+               content = msg.parts?.text || String(msg);
+             }
              messages.push({ role, content });
           }
         }
@@ -192,7 +207,7 @@ If you use web search to find information, always include the source links in a 
       }
       
       const baseUrl = process.env.MAXROUTER_BASE_URL || "https://api.openai.com/v1";
-      const messages = [{ role: "system", content: finalSystemPrompt }];
+      const messages: any[] = [{ role: "system", content: finalSystemPrompt }];
       
       if (typeof contents === "string") {
         messages.push({ role: "user", content: contents });
@@ -200,7 +215,22 @@ If you use web search to find information, always include the source links in a 
         for (const msg of contents) {
           if (msg.role === "user" || msg.role === "model") {
              const role = msg.role === "model" ? "assistant" : "user";
-             const content = Array.isArray(msg.parts) ? msg.parts.map((p: any) => p.text).join("\n") : msg.parts?.text || String(msg);
+             let content: any;
+             if (Array.isArray(msg.parts)) {
+               const hasImages = msg.parts.some((p: any) => p.inlineData);
+               if (hasImages) {
+                 content = msg.parts.map((p: any) => {
+                   if (p.inlineData) {
+                     return { type: "image_url", image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } };
+                   }
+                   return { type: "text", text: p.text || "" };
+                 });
+               } else {
+                 content = msg.parts.map((p: any) => p.text).join("\n");
+               }
+             } else {
+               content = msg.parts?.text || String(msg);
+             }
              messages.push({ role, content });
           }
         }
