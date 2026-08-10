@@ -53,8 +53,11 @@ interface ChatHistoryItem {
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
+import puter from '@heyputer/puter.js';
 
 const AI_MODELS = [
+  { id: "claude-3-5-sonnet", label: "XeeTron Gen2 Pro", provider: "puter", status: "online", group: "Gen 2", description: "Model AI canggih dari Anthropic (Claude 3.5 Sonnet) melalui Puter.js.", tags: ["Advanced", "Reasoning"] },
+  { id: "gpt-4o", label: "XeeTron Gen2 Vision", provider: "puter", status: "online", group: "Gen 2", description: "Model AI multimodal canggih dari OpenAI (GPT-4o) melalui Puter.js.", tags: ["Multimodal", "Advanced"] },
   { id: "deepseek-v3.2", label: "XeeTron Pro 3.0", provider: "maxrouter", status: "online", group: "Gen 1", description: "Model paling canggih dengan penalaran mendalam dan sangat ahli dalam penulisan kode tingkat lanjut.", tags: ["Advanced Coding", "Thinking"] },
   { id: "openai/gpt-oss-20b:free-flash", baseModel: "openai/gpt-oss-20b:free", label: "XeeTron Flash 2.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Model stabil dengan kecepatan tinggi, ideal untuk pembuatan konten tingkat lanjut dan SEO.", tags: ["SEO", "Stable", "Fast"] },
   { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", description: "Kapasitas pemrosesan tinggi, sangat ahli dalam penulisan dan analisis kode.", tags: ["Coding"] },
@@ -358,7 +361,11 @@ export default function App() {
     const shouldGenerateTitle = activeChat.messages.length === 0;
     updateActiveChatMessages(newMessages, shouldGenerateTitle);
     setIsLoading(true);
-    setIsGeneratingImage((AI_MODELS.find(m => m.id === selectedModel) as any)?.isImage || false);
+    const selectedModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
+    const imageRequested = (selectedModelObj as any).isImage;
+    const actualModel = imageRequested ? "flux-1-schnell" : (selectedModelObj as any).baseModel || selectedModel;
+    const actualProvider = imageRequested ? "cloudflare" : selectedModelObj.provider;
+    setIsGeneratingImage(imageRequested || false);
 
     try {
       const contents = newMessages.map(m => {
@@ -366,15 +373,24 @@ export default function App() {
         if (m.text) {
           parts.push({ text: m.text });
         }
-        if (m.attachments) {
+        if (!imageRequested && m.attachments) {
           m.attachments.forEach(att => {
             if (att.base64 && att.mimeType) {
-              parts.push({
-                inlineData: {
-                  data: att.base64,
-                  mimeType: att.mimeType
-                }
-              });
+              if (actualProvider === 'openrouter' || actualProvider === 'maxrouter') {
+                parts.push({
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${att.mimeType};base64,${att.base64}`
+                  }
+                });
+              } else {
+                parts.push({
+                  inlineData: {
+                    data: att.base64,
+                    mimeType: att.mimeType
+                  }
+                });
+              }
             }
           });
         }
@@ -387,25 +403,55 @@ export default function App() {
           parts: parts
         };
       });
-      const selectedModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
-      const imageRequested = (selectedModelObj as any).isImage;
-      const actualModel = imageRequested ? "flux-1-schnell" : (selectedModelObj as any).baseModel || selectedModel;
-      const actualProvider = imageRequested ? "cloudflare" : selectedModelObj.provider;
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents, model: actualModel, provider: actualProvider }),
-      });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Server sedang sibuk. Silakan coba beberapa saat lagi.');
-      }
+      let responseText = "";
+      let responseImages: string[] = [];
       
+      if (actualProvider === 'puter') {
+        const puterMessages = newMessages.map(m => {
+          let content: any = m.text;
+          
+          if (m.attachments && m.attachments.length > 0) {
+             const messageParts: any[] = [{ type: 'text', text: m.text || " " }];
+             m.attachments.forEach(att => {
+                if (att.base64 && att.mimeType && att.type === 'image') {
+                   messageParts.push({ type: 'image_url', image_url: { url: `data:${att.mimeType};base64,${att.base64}` } });
+                }
+             });
+             content = messageParts.length > 1 ? messageParts : content;
+          }
+          
+          return { role: m.role === 'model' ? 'assistant' : m.role, content };
+        });
+
+        try {
+          const resp = await puter.ai.chat(puterMessages, { model: actualModel });
+          responseText = resp?.message?.content || resp?.text || (typeof resp === 'string' ? resp : JSON.stringify(resp));
+        } catch (err: any) {
+           throw new Error(err.message || 'Puter.js error');
+        }
+      } else {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents, model: actualModel, provider: actualProvider }),
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          throw new Error(data.error || 'Server sedang sibuk. Silakan coba beberapa saat lagi.');
+        }
+        
+        responseText = data.text;
+        if (data.images && data.images.length > 0) {
+           responseImages = data.images;
+        }
+      }
+
       const responseAttachments: Attachment[] = [];
-      if (data.images && data.images.length > 0) {
-        data.images.forEach((imgStr: string, idx: number) => {
+      if (responseImages.length > 0) {
+        responseImages.forEach((imgStr: string, idx: number) => {
           responseAttachments.push({
             id: `img-${Date.now()}-${idx}`,
             type: 'image',
@@ -415,7 +461,7 @@ export default function App() {
         });
       }
 
-      updateActiveChatMessages([...newMessages, { role: 'model', text: data.text, attachments: responseAttachments.length > 0 ? responseAttachments : undefined, modelId: selectedModel }]);
+      updateActiveChatMessages([...newMessages, { role: 'model', text: responseText, attachments: responseAttachments.length > 0 ? responseAttachments : undefined, modelId: selectedModel }]);
       
       if (notificationSettings.soundEnabled && notificationSettings.aiResponseNotif) {
         playNotifSound();

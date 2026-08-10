@@ -17,6 +17,7 @@
     "@capacitor/core": "^8.4.1",
     "@cloudflare/ai": "^1.2.2",
     "@google/genai": "^2.16.0",
+    "@heyputer/puter.js": "^2.6.0",
     "@huggingface/inference": "^4.13.25",
     "@langchain/core": "^1.2.5",
     "@mistralai/mistralai": "^2.6.1",

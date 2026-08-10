@@ -162,9 +162,10 @@ If you use web search to find information, always include the source links in a 
              const role = msg.role === "model" ? "assistant" : "user";
              let content: any;
              if (Array.isArray(msg.parts)) {
-               const hasImages = msg.parts.some((p: any) => p.inlineData);
-               if (hasImages) {
+               const hasComplexParts = msg.parts.some((p: any) => p.type === "image_url" || p.inlineData);
+               if (hasComplexParts) {
                  content = msg.parts.map((p: any) => {
+                   if (p.type === "image_url") return p;
                    if (p.inlineData) {
                      return { type: "image_url", image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } };
                    }
@@ -217,9 +218,10 @@ If you use web search to find information, always include the source links in a 
              const role = msg.role === "model" ? "assistant" : "user";
              let content: any;
              if (Array.isArray(msg.parts)) {
-               const hasImages = msg.parts.some((p: any) => p.inlineData);
-               if (hasImages) {
+               const hasComplexParts = msg.parts.some((p: any) => p.type === "image_url" || p.inlineData);
+               if (hasComplexParts) {
                  content = msg.parts.map((p: any) => {
+                   if (p.type === "image_url") return p;
                    if (p.inlineData) {
                      return { type: "image_url", image_url: { url: `data:${p.inlineData.mimeType};base64,${p.inlineData.data}` } };
                    }
