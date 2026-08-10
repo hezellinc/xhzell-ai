@@ -56,17 +56,17 @@ import { auth, db } from './firebase';
 import puter from '@heyputer/puter.js';
 
 const AI_MODELS = [
-  { id: "claude-3.7-sonnet", label: "XeeTron 3.5 Flash", provider: "puter", status: "online", group: "Gen 2" },
-  { id: "gpt-4o", label: "Xeetron 3.5 Lite", provider: "puter", status: "online", group: "Gen 2" },
-  { id: "deepseek-v3.2", label: "XeeTron Pro 3.0", provider: "maxrouter", status: "online", group: "Gen 1" },
-  { id: "deepseek-v3", label: "Xeetron 3.7", provider: "puter", status: "online", group: "Gen 2" },
-  { id: "gemini-3.5-flash-lite", label: "XeeTron 3.5 Plus", provider: "puter", status: "online", group: "Gen 2" },
-  { id: "gpt-5-nano", label: "Xeetron 3.7 Plus", provider: "puter", status: "online", group: "Gen 2" },
-  { id: "openai/gpt-oss-20b:free-flash", baseModel: "openai/gpt-oss-20b:free", label: "XeeTron Flash 2.5", provider: "openrouter", status: "online", group: "Gen 1" },
-  { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1" },
-  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1" },
-  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.1", provider: "gemini", status: "online", group: "Gen 1" },
-  { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1" },
+  { id: "claude-3.7-sonnet", label: "XeeTron 3.5 Flash", provider: "puter", status: "online", group: "Gen 2", tags: ["Thinking", "Reasoning", "Coding"] },
+  { id: "gpt-4o", label: "Xeetron 3.5 Lite", provider: "puter", status: "online", group: "Gen 2", tags: ["Multimodal", "Fast Coding"] },
+  { id: "deepseek-v3.2", label: "XeeTron Pro 3.0", provider: "maxrouter", status: "online", group: "Gen 1", tags: ["Reasoning", "Technical Analysis"] },
+  { id: "deepseek-v3", label: "Xeetron 3.7", provider: "puter", status: "online", group: "Gen 2", tags: ["Fast Inference", "Structural Coding"] },
+  { id: "gemini-3.5-flash-lite", label: "XeeTron 3.5 Plus", provider: "puter", status: "online", group: "Gen 2", tags: ["Low Latency", "Multimodal"] },
+  { id: "gpt-5-nano", label: "Xeetron 3.7 Plus", provider: "puter", status: "online", group: "Gen 2", tags: ["Edge Device Execution", "Low Memory Task"] },
+  { id: "openai/gpt-oss-20b:free-flash", baseModel: "openai/gpt-oss-20b:free", label: "XeeTron Flash 2.5", provider: "openrouter", status: "online", group: "Gen 1", tags: ["Task Automation", "SEO"] },
+  { id: "poolside/laguna-s-2.1:free", label: "XeeTron Flash 1.5", provider: "openrouter", status: "online", group: "Gen 1", tags: ["Code Refactoring", "Coding Agent"] },
+  { id: "openai/gpt-oss-20b:free", label: "XeeTron Lite 1.2", provider: "openrouter", status: "online", group: "Gen 1", tags: ["Fast Text Generation"] },
+  { id: "gemini-2.5-flash", label: "XeeTron Lite 1.1", provider: "gemini", status: "online", group: "Gen 1", tags: ["LCP", "Multimodal", "HSE", "Task Automation"] },
+  { id: "flux-1-schnell", label: "XeeTron Image 1.0", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", tags: ["Art", "Anime"] },
 ];
 const MessageActions = ({ text }: { text: string }) => {
   const [liked, setLiked] = useState(false);
@@ -440,6 +440,8 @@ export default function App() {
               responseText = resp.text;
             } else if (typeof resp.message?.content === 'string') {
               responseText = resp.message.content;
+            } else if (Array.isArray(resp.message?.content)) {
+              responseText = resp.message.content.map((c: any) => c.text || '').join('');
             } else {
               try {
                 responseText = JSON.stringify(resp);
@@ -1158,6 +1160,15 @@ export default function App() {
                                         <div className={`w-2 h-2 rounded-full ${statusColor}`} />
                                       </div>
                                     </div>
+                                    {modelItem.tags && (
+                                      <div className="flex flex-wrap gap-1.5 mt-2">
+                                        {modelItem.tags.map((tag, idx) => (
+                                          <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-300">
+                                            {tag}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
                                   </button>
                                 );
                               })}
