@@ -6,6 +6,9 @@ import { Sparkles, ArrowRight, MessageSquare, Image as ImageIcon, Zap, Code, Shi
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  isAuthenticated?: boolean;
+  userName?: string;
+  userPhotoURL?: string;
 }
 
 const FeatureCard = ({ icon: Icon, title, description, delay, className = "" }: any) => (
@@ -27,7 +30,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay, className = "" }: 
   </motion.div>
 );
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, isAuthenticated, userName, userPhotoURL }) => {
   const logos = [
     { src: '/react-logo.jpg', alt: 'React' },
     { src: '/vite-logo.jpg', alt: 'Vite' },
@@ -77,12 +80,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <a href="#features" className="hover:text-white transition-colors">Fitur</a>
             <a href="#preview" className="hover:text-white transition-colors">Preview</a>
           </nav>
-          <button 
-            onClick={onGetStarted}
-            className="bg-white text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-transform active:scale-95"
-          >
-            Masuk
-          </button>
+          {isAuthenticated ? (
+            <button 
+              onClick={onGetStarted}
+              className="flex items-center gap-2 bg-white/10 border border-white/20 text-white px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-white/20 transition-colors"
+            >
+              {userPhotoURL ? (
+                <img src={userPhotoURL} alt={userName || 'User'} className="w-6 h-6 rounded-full" />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white uppercase">
+                  {userName?.[0] || 'U'}
+                </div>
+              )}
+              <span className="max-w-[100px] truncate">{userName}</span>
+            </button>
+          ) : (
+            <button 
+              onClick={onGetStarted}
+              className="bg-white text-black px-4 py-2 rounded-xl text-sm font-semibold hover:bg-white/90 transition-transform active:scale-95"
+            >
+              Masuk
+            </button>
+          )}
         </div>
       </header>
 

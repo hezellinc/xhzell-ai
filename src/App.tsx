@@ -56,6 +56,7 @@ import { auth, db } from './firebase';
 const AI_MODELS = [
   { id: "gemini-2.5-flash", label: "xsp-3pro", provider: "gemini", status: "online", group: "Gen 1", description: "Cepat dan responsif, cocok untuk tugas teks umum dan tanya jawab." },
   { id: "openai/gpt-oss-20b:free", label: "xsp-grok", provider: "openrouter", status: "online", group: "Gen 1", description: "Model open source via OpenRouter dengan kapabilitas penalaran canggih (GPT OSS 20b Free)." },
+  { id: "poolside/laguna-s-2.1:free", label: "xsp-laguna", provider: "openrouter", status: "online", group: "Gen 1", description: "Model canggih dari Poolside, andal untuk penalaran dan pemrograman (Laguna S 2.1)." },
   { id: "flux-1-schnell", label: "xsp-image", provider: "cloudflare", isImage: true, status: "connecting", group: "Gen 1", description: "Spesialis dalam menghasilkan gambar berkualitas tinggi dari teks." },
 ];
 export default function App() {
@@ -68,7 +69,9 @@ export default function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showLandingPage, setShowLandingPage] = useState(true);
+  const [showLandingPage, setShowLandingPage] = useState(() => {
+    return localStorage.getItem('xhzell_auth') !== 'true';
+  });
   const [userName, setUserName] = useState('');
   const [userPhotoURL, setUserPhotoURL] = useState('');
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -91,6 +94,7 @@ export default function App() {
 
       if (user) {
         setIsAuthenticated(true);
+        localStorage.setItem('xhzell_auth', 'true');
         let name = user.displayName || user.email?.split('@')[0] || 'User';
         let photo = '';
         try {
@@ -108,8 +112,10 @@ export default function App() {
         setUserPhotoURL(photo);
       } else {
         setIsAuthenticated(false);
+        localStorage.removeItem('xhzell_auth');
         setUserName('');
         setUserPhotoURL('');
+        setShowLandingPage(true);
       }
       setIsAuthReady(true);
     });
@@ -454,7 +460,13 @@ export default function App() {
 
       <AnimatePresence mode="wait">
         {showLandingPage ? (
-          <LandingPage key="landing" onGetStarted={() => setShowLandingPage(false)} />
+          <LandingPage 
+            key="landing" 
+            onGetStarted={() => setShowLandingPage(false)}
+            isAuthenticated={isAuthenticated}
+            userName={userName}
+            userPhotoURL={userPhotoURL}
+          />
         ) : !isAuthenticated ? (
           <LoginPage key="login" onBack={() => setShowLandingPage(true)} onLoginSuccess={(name) => {
             setUserName(name);
