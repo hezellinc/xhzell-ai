@@ -174,8 +174,7 @@ If you use web search to find information, always include the source links in a 
         },
         body: JSON.stringify({
           model: selectedModel,
-          messages: messages,
-          reasoning: { enabled: true }
+          messages: messages
         })
       });
 
@@ -256,13 +255,15 @@ If you use web search to find information, always include the source links in a 
     // Log detail ke backend console (Vercel logs) untuk memudahkan debugging
     console.error(`[API Error - ${selectedProvider} - ${selectedModel}]:`, error.response?.data || error.message || error);
     
-    // Kirim pesan ramah ke frontend
-    res.status(500).json({ error: "Server sedang sibuk. Silakan coba beberapa saat lagi." });
+    // Kirim error sebenarnya ke frontend
+    res.status(500).json({ error: error.message || "Server mengalami gangguan. Silakan coba lagi." });
   }
 });
 
 async function startServer() {
-  const PORT = Number(process.env.PORT) || 3000;
+  // In AI Studio, the PORT environment variable is hardcoded to 8080 by the infra during npm start
+  // but we are required to always bind to 3000 as per environment constraints
+  const PORT = 3000;
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {

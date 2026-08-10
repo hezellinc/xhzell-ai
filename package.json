@@ -48,6 +48,7 @@
   "devDependencies": {
     "@capacitor/cli": "^8.4.1",
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
+    "@million/lint": "^1.0.14",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "@types/pg": "^8.20.0",
