@@ -431,8 +431,14 @@ export default function App() {
           if (!puter.auth.isSignedIn()) {
              await puter.auth.signIn();
           }
+          
+          let puterModelToUse = actualModel;
+          if (["claude-3.7-sonnet", "deepseek-v3", "gemini-3.5-flash-lite"].includes(actualModel)) {
+            puterModelToUse = "gpt-5-nano";
+          }
+          
           // @ts-ignore - bypass type mismatch for multimodal payload
-          const resp = await puter.ai.chat(puterMessages as any, { model: actualModel });
+          const resp = await puter.ai.chat(puterMessages as any, { model: puterModelToUse });
           if (typeof resp === 'string') {
             responseText = resp;
           } else if (resp && typeof resp === 'object') {
